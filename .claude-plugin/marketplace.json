@@ -1,0 +1,24 @@
+{
+  "name": "lamp-skills",
+  "description": "Igness LAMP / BRAIN を AI エージェントから操作するためのスキル集",
+  "owner": {
+    "name": "Igness, Inc.",
+    "url": "https://www.igness.ai"
+  },
+  "plugins": [
+    {
+      "name": "lamp",
+      "description": "Igness LAMP / BRAIN の初期セットアップとメディアアップロードを Salesforce CLI 経由で自動実行するスキル",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/lamp-setup",
+        "./skills/lamp-media-upload"
+      ],
+      "version": "1.0.0",
+      "category": "productivity",
+      "tags": ["salesforce", "line", "lamp", "igness"],
+      "homepage": "https://github.com/igness-ai/lamp-skills"
+    }
+  ]
+}

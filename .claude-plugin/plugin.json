@@ -1,0 +1,13 @@
+{
+  "name": "lamp",
+  "description": "Igness LAMP / BRAIN の初期セットアップとメディアアップロードを Salesforce CLI 経由で自動実行するスキル",
+  "version": "1.0.0",
+  "author": {
+    "name": "Igness, Inc.",
+    "url": "https://www.igness.ai"
+  },
+  "homepage": "https://github.com/igness-ai/lamp-skills",
+  "repository": "https://github.com/igness-ai/lamp-skills",
+  "license": "MIT",
+  "keywords": ["salesforce", "line", "lamp", "igness"]
+}
