@@ -16,24 +16,24 @@ LAMP/BRAINパッケージ（バージョン1.153以降）をインストール�
 
 以降のコマンドの `<org>` は対象組織の別名に置き換える。**必ず最初に対象組織をユーザーに確認する**（顧客の本番組織を扱うため、組織の取り違えは重大事故になる）。
 
-## Step 1: インストール時自動セットアップの確認
+## Step 1: 初期セットアップの実行
 
-パッケージのインストール時に、権限セットグループの作成とスケジューラーの登録は自動実行されている。まず結果を確認する:
+パッケージのインストールでは組織のメタデータは変更されない（バージョン 1.157 以降）。権限セットグループ 6 件・ローカル権限セット・日次スケジュールジョブ 2 件は、次のアクションで管理者の権限で作成する（冪等・何度実行しても安全。既に揃っている組織では何も作らず `executed: false` を返す）:
+
+```bash
+sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampAutoSetupAction" --method POST -b '{"inputs":[{}]}' -o <org>
+```
+
+実行後に結果を確認する:
 
 ```bash
 sf data query -q "SELECT DeveloperName, Status FROM PermissionSetGroup WHERE DeveloperName LIKE 'LAMP_%' OR DeveloperName LIKE 'BRAIN_%'" -o <org>
 sf data query -q "SELECT CronJobDetail.Name FROM CronTrigger WHERE CronJobDetail.Name LIKE 'LAMP - %'" -o <org>
 ```
 
-- 権限セットグループ6件（LAMP_SystemAdministrator_Group / LAMP_User_Group / LAMP_MarketingAdministrator_Group / LAMP_MarketingUser_Group / BRAIN_Administrator_Group / BRAIN_User_Group）とスケジュールジョブ2件（ReplyHistoryScheduler / AggregationUpdateBatch）があればOK
+- 権限セットグループ6件（LAMP_SystemAdministrator_Group / LAMP_User_Group / LAMP_MarketingAdministrator_Group / LAMP_MarketingUser_Group / BRAIN_Administrator_Group / BRAIN_User_Group）とスケジュールジョブ2件（ReplyHistoryScheduler / AggregationUpdateBatch）が揃っていれば完了
 - `Status` が `Updated` でないグループは再計算中。数分待って再確認する
-- 欠けている場合は、以下で不足分を自動作成できる（冪等・何度実行しても安全）:
-
-```bash
-sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampAutoSetupAction" --method POST -b '{"inputs":[{}]}' -o <org>
-```
-
-実行後、最初のクエリで作成されたことを再確認する
+- 1.153〜1.156 でインストールした組織では一部がインストール時に自動作成されているが、同じアクションを実行して問題ない（不足分だけ作られる）
 
 ## Step 2: ユーザーへの権限セットグループ割当
 
