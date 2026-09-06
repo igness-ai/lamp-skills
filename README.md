@@ -1,7 +1,7 @@
 # lamp-skills
 
 [Igness LAMP / BRAIN](https://www.igness.ai) を AI コーディングエージェントから操作するためのスキル集です。
-Claude Code をはじめ、Salesforce CLI（`sf`）を実行できるエージェントであれば同じ手順書で動作します。
+Claude Code・Codex・Blaze をはじめ、Salesforce CLI（`sf`）を実行できるエージェントであれば同じ手順書で動作します。
 
 | スキル | できること | 必要なパッケージ |
 | --- | --- | --- |
@@ -21,7 +21,11 @@ Claude Code をはじめ、Salesforce CLI（`sf`）を実行できるエージ�
 以後は「LAMP をセットアップして」「LAMP に画像をアップロードして」「LAMP でカードメッセージのテンプレートを作って」のように依頼するだけで、対応するスキルが使われます。
 更新は `/plugin update lamp@lamp-skills` で取り込めます。
 
-### 手動コピー（Claude Code / Codex / その他のエージェント）
+### Blaze
+
+[Blaze](https://blaze.igness.ai/) は Skills に対応しています。設定 → Skills の「Skill を追加」で、`skills/<name>` フォルダを ZIP にして「アップロード」するか、「新規作成」で `SKILL.md` の内容を貼り付けてください。チャットでは `/<name>`（例: `/lamp-setup`）で呼び出せます。詳しくは [Blaze ヘルプ「スキル（Skills）」](https://blaze.igness.ai/help/settings/skills) を参照してください。
+
+### 手動コピー（Codex / その他のエージェント）
 
 `skills/<name>/SKILL.md` を、作業フォルダのスキル置き場にコピーします。
 
@@ -62,7 +66,7 @@ cp -R lamp-skills/skills/* .claude/skills/
 ## 関連リンク
 
 - [Igness LAMP ヘルプ](https://help.igness.ai)
-- [Claude Code で自動セットアップ](https://help.igness.ai/lamp/getting-started/auto-setup-claude-code)
+- [AIエージェントで自動セットアップ](https://help.igness.ai/lamp/getting-started/auto-setup-ai-agent)
 
 ## ライセンス
 
