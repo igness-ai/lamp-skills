@@ -8,15 +8,18 @@
   "plugins": [
     {
       "name": "lamp",
-      "description": "Igness LAMP / BRAIN の初期セットアップ・メディアアップロード・テンプレート作成を Salesforce CLI 経由で自動実行するスキル",
+      "description": "Igness LAMP / BRAIN の初期セットアップ・メディアアップロード・テンプレート作成・一斉配信・リッチメニュー・クーポンを Salesforce CLI 経由で自動実行するスキル",
       "source": "./",
       "strict": false,
       "skills": [
         "./skills/lamp-setup",
         "./skills/lamp-media-upload",
-        "./skills/lamp-template"
+        "./skills/lamp-template",
+        "./skills/lamp-broadcast",
+        "./skills/lamp-richmenu",
+        "./skills/lamp-coupon"
       ],
-      "version": "1.1.0",
+      "version": "1.2.0",
       "category": "productivity",
       "tags": [
         "salesforce",

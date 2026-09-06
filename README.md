@@ -8,6 +8,9 @@ Claude Code・Codex・Blaze をはじめ、Salesforce CLI（`sf`）を実行で�
 | [`lamp-setup`](skills/lamp-setup/SKILL.md) | パッケージインストール後の初期設定（権限割当・サーバー認証・パス有効化）と LINE 公式アカウント接続を自動で進める | Igness LAMP **1.153 以降** |
 | [`lamp-media-upload`](skills/lamp-media-upload/SKILL.md) | 画像・動画をコンテンツ配信基盤へアップロードし、テンプレートメッセージ・クーポン・リッチメニュー・送信元アイコンに設定する | Igness LAMP **1.155 以降** |
 | [`lamp-template`](skills/lamp-template/SKILL.md) | テンプレートと9種類のテンプレートメッセージ（テキスト／画像／動画／リンク付き画像／カード／設問（2択）／カード（画像のみ）／クーポン／フレックス）を作成し、有効化エラーを読んで修正、返信ボタン・項目の代入・テスト配信まで行う | Igness LAMP **1.156 以降** |
+| [`lamp-broadcast`](skills/lamp-broadcast/SKILL.md) | 一斉配信を作成・スケジュール・キャンセルし、配信の状態確認、配信結果（成功／失敗、個人別 CSV）、既読数・クリック数の取得まで行う | Igness LAMP **1.157 以降** |
+| [`lamp-richmenu`](skills/lamp-richmenu/SKILL.md) | リッチメニューを作成・検証・LINE に発行し、デフォルト設定・友だち個別の割当・差し替え・削除まで行う | Igness LAMP **1.157 以降** |
+| [`lamp-coupon`](skills/lamp-coupon/SKILL.md) | LINE クーポンを作成・検証・発行し、テンプレートへの組み込み、内容変更（複製→再発行）、終了まで行う | Igness LAMP **1.157 以降** |
 
 ## インストール
 
@@ -18,7 +21,7 @@ Claude Code・Codex・Blaze をはじめ、Salesforce CLI（`sf`）を実行で�
 /plugin install lamp@lamp-skills
 ```
 
-以後は「LAMP をセットアップして」「LAMP に画像をアップロードして」「LAMP でカードメッセージのテンプレートを作って」のように依頼するだけで、対応するスキルが使われます。
+以後は「LAMP をセットアップして」「LAMP に画像をアップロードして」「LAMP でカードメッセージのテンプレートを作って」「毎朝 9 時に配信して」「リッチメニューを発行して」「クーポンを作って」のように依頼するだけで、対応するスキルが使われます。
 更新は `/plugin update lamp@lamp-skills` で取り込めます。
 
 ### Blaze
@@ -60,6 +63,7 @@ cp -R lamp-skills/skills/* .claude/skills/
 
 | lamp-skills | LAMP パッケージ |
 | --- | --- |
+| 1.2.x | 1.157 以降を推奨（`lamp-broadcast` / `lamp-richmenu` / `lamp-coupon` は 1.157 以降で動作。他は 1.1.x と同じ） |
 | 1.1.x | 1.156 以降を推奨（`lamp-setup` は 1.153 以降、`lamp-media-upload` は 1.155 以降、`lamp-template` は 1.156 以降で動作） |
 | 1.0.x | `lamp-setup` / `lamp-media-upload` のみ |
 
