@@ -29,7 +29,7 @@ UI の fileUploader と同じ経路を、2つの global アクション（Action
 | `video` | 動画メッセージ | mp4 のみ | `.../contents/videos/original/<id>.mp4` | `igns__TemplateMessage__c.igns__OriginalContentUrl__c`（`igns__PreviewImageUrl__c` にサムネが自動設定） |
 | `video_thumbnail` | 動画のプレビュー画像 | jpg 固定 | 動画の完了処理で検証 | 単独では完了処理を呼ばない（下記「動画」参照） |
 | `coupon` | クーポン画像 | png/jpg | `.../contents/coupon/upload/<id>.<ext>` | `igns__Coupon__c.igns__ImageUrl__c`（UUID: `igns__ImageUuid__c`）。バーコードは `igns__BarcodeUrl__c` / `igns__BarcodeUuid__c` |
-| `richmenu` | リッチメニュー画像 | png/jpg（2500×1686 または 2500×843） | `.../contents/templateImages/upload/<id>.<ext>` | `igns__RichMenu__c.igns__ImageUrl__c`（UUID: `igns__Uuid__c`）。LINE への画像登録はリッチメニュー作成時に自動 |
+| `richmenu` | リッチメニュー画像 | png/jpg。**幅 800〜2500px・高さ 250px 以上・幅÷高さ 1.45 以上・1MB 以下**（標準は 2500×1686 または 2500×843。選んだレイアウト `igns__LampBound__mdt` の `Width__c × Height__c` に合わせる） | `.../contents/templateImages/upload/<id>.<ext>`（リサイズなし） | `igns__RichMenu__c.igns__ImageUrl__c`（UUID: `igns__Uuid__c`）。LINE への画像登録はリッチメニュー発行時に自動 |
 | `profile` | 送信元（Sender）のアイコン | png/jpg | `.../contents/profile/upload/<id>.<ext>` | `igns__Sender__c.igns__PictureUrl__c`（UUID: `igns__UUID__c`） |
 
 `image_coupon` / `image_richmenu` / `image_profile` / `sender` も同じ意味で受け付ける。
@@ -88,6 +88,26 @@ LINE 仕様でプレビュー画像が必須。動画とサムネは **同じ cu
 
 - ③が返す URL は拡張子なし。**`.png` の直リンクを `igns__OriginalContentUrl__c` に入れると LINE で「読み込めませんでした」になる**ため、テンプレートメッセージの検証（`igns__ValidationErrors__c`）でも拒否される
 - 画像は 1040px 幅推奨。分割パターン（`igns__BoundName__c`）の比率に合わせる
+
+## リッチメニュー画像の事前チェック
+
+アップロード前にローカルで寸法と容量を確認する（LINE の制約に合わないと発行時にエラーになる）:
+
+```bash
+sips -g pixelWidth -g pixelHeight <ファイル>   # macOS。Linux は identify（ImageMagick）
+stat -f %z <ファイル>                           # 1048576 以下
+```
+
+発行時（`igns__LampPublishRichMenuAction`、LAMP 1.157 以降）に backend が画像を再検証し、不備は次の理由で返る:
+
+| 理由 | 対処 |
+|---|---|
+| 画像の寸法（W×H px）が対応していません | 幅 800〜2500・高さ 250 以上・幅÷高さ 1.45 以上に作り直す |
+| 画像の容量が1MBを超えています | JPEG 圧縮や PNG の減色で 1MB 以下にする |
+| 画像の形式が対応していません / 読み取れませんでした | 静止画の JPEG/PNG を上げ直す（GIF・WebP・破損ファイルは不可） |
+| 画像を取得できませんでした | `ImageUrl__c` がコンテンツ配信基盤の URL か確認して上げ直す |
+
+失敗したときは LINE 側に未完成メニューが残らない（backend が回収する）ので、修正してそのまま再発行してよい。
 
 ## 作成後の確認
 
