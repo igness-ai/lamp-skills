@@ -10,6 +10,8 @@ description: Igness LAMP の自動応答を種別 Agentforce で作成・設定�
 
 Prompt Builderで作成した返信ドラフトを担当者のチャット入力欄に出す設定は、`lamp-chat` の「文面提案エージェントID／テンプレート」で行う。
 
+固定のBot応答や「受付で内容を選んでAgentforceへつなぐ」構成は `lamp-bot` を使う。[受付一式の設定例](../lamp-bot/references/intake-routing.md) からこのスキルを組み合わせて実行できる。
+
 ## 前提と対象の確認
 
 - 本スキルは LAMP 基本パッケージ **1.157 以降**を対象にする。対象 org に `sf` で接続済みであること（以下 `<org>`）。
@@ -131,6 +133,8 @@ sf api request rest "/services/data/v67.0/sobjects/igns__AutoKeyword__c" --metho
 - ラベルや `ActionMessage{n}__c` は表示用途に合わせる。ボタンの表示メッセージを最初の Agentforce への質問として扱わない。
 
 添字と保存先は `lamp-template` / `lamp-richmenu` を参照。リッチメニューの変更は再発行が必要。呼出元と自動応答の公式アカウントを揃える。公開中のボタンへテスト用設定を接続すると一般の友だちからも起動できるため、テスト専用のテンプレート・メニューを使う。
+
+返信ボタン、カード、Flex、リッチメニューから呼び出せる。場所ごとの設定と項目代入の制限は [アクションの接続](../lamp-template/references/actions.md) を読む。`callagent` を押すと既存会話があれば終了して新規会話を開始する。固定案内を返す `postback` とは違い、押すたびに会話が切り替わる点を確認する。
 
 ### 常に反応（NONE）
 

@@ -82,6 +82,8 @@ sf api request rest "/services/data/v67.0/sobjects/igns__RichMenu__c" --method P
 
 Agentforce の自動応答を呼び出す場合は、`lamp-agentforce` で種別 `Agentforce` の自動応答を作成し、その Id を `ActionReply{n}` に設定する。
 
+Botの受付メニューを開くなら `postback` で受付テンプレートを指定する。一式の構成は `lamp-bot`、固定案内とエージェント起動の違い・項目代入の保存先・現在会話への影響は [アクションの接続](../lamp-template/references/actions.md) を参照する。リッチメニューに `message` やimagemap専用の領域設定を混ぜない。
+
 ## ④ 検証ループ
 
 ```bash

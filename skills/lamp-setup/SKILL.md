@@ -121,12 +121,14 @@ sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampComplete
 
 ### 5-4. リード・取引先責任者との連携（任意）
 
-リード/取引先責任者と友だちを紐付ける場合のみ:
+リード/取引先責任者と友だちを紐付ける場合のみ。先に [既存の友だち参照項目を確認](references/social-friend-fields.md) する。通常の作成名は `SocialFriend_<LampId>__c` だが、未作成・別名・オブジェクトの利用不可もある。既存の設定が使えるなら再利用し、新規連携項目の作成が必要な場合に実行する:
 
 ```bash
 sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampSetupRelationshipFieldsAction" --method POST \
   -b '{"inputs":[{"socialAccountId":"<5-2で取得したrecordId>"}]}' -o <org>
 ```
+
+返った `success`、`leadFieldApiName`、`contactFieldApiName` と、公式アカウントの `LeadField__c` / `ContactField__c` を照合し、describeで実在・参照先を確認する。片方が未作成なら両方成功と報告しない。項目作成と既存レコードへの値の同期は別に確認する。
 
 ### 5-5. 疎通確認
 

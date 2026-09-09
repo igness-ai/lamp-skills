@@ -30,6 +30,8 @@ Salesforce のレコードページに置く **LAMP Chat Component** の設定�
 `height` の設定画面の説明には単位付きの例があるが、現行の描画処理に合わせて `600` のように指定する。
 友だち参照項目は名前を推測しない。Lead / Contact なら公式アカウントの連携設定にある `LeadField__c` / `ContactField__c` と、対象オブジェクトのdescribeで確認する。項目が存在してもレコードの値が空ならチャットの相手を解決できない。
 
+一般的な作成名は `SocialFriend_<LampId>__c` だが、未作成・別名・片方のオブジェクトのみの場合もある。配置前に [友だち参照項目の確認](../lamp-setup/references/social-friend-fields.md) を行い、参照先・権限・実値まで確認する。
+
 Experience Builderで配置する場合も同じプロパティを使い、追加で `recordId={!recordId}` と `objectApiName={!objectApiName}` が対象ページから渡ることを確認する。
 
 ### CLIでページ設定を変更する場合

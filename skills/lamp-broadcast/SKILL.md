@@ -40,6 +40,7 @@ LAMP の一斉配信は **配信設定（`igns__Broadcast__c`）** というレ�
 - **scheduled にすると顧客の LINE 友だちに実際に届く。** ④ の前に「対象人数」「テンプレート名と本文の要約」「配信日時（繰り返しなら頻度と終了日）」をユーザーに提示して明示の承認を得る
 - 配信は **スケジュールした人**（Status__c を scheduled にしたユーザー）の権限で実行される。Report モードのレポートはその人が実行できる場所（自分の非公開フォルダ、または共有フォルダ）に置く。他人の非公開フォルダのレポートは実行できず、発火時に失敗する
 - Report モードは同期実行のため **1 回の発火で 2,000 行まで**。それ以上は CSV モードにするか、レポートを分割して配信設定を複数にする
+- **レポートの先頭の詳細列は必ずSocialFriendId（友だちレコードId）**。列名・見出しだけでなく、元項目と全行の値・実在・公式アカウントを [検証手順](references/report-validation.md) で確認する。Lead / Contact自身のIdを置かない
 - 単発で固定リストなら CSV、繰り返し・ステップ・セグメントなら Report（上表）
 - スケジュール中（`scheduled` / `working`）は繰り返し設定（`igns__Cron__c`）を変更できない。変えるときはキャンセル → 下書きに戻す → 再スケジュール
 - 記録した Id は会話に残し、同じ配信を二重に作らない。既存の下書きがないか `Name` で検索してから作る
@@ -82,10 +83,11 @@ sf api request rest "/services/data/v67.0/sobjects/ContentVersion" --method POST
 
 **レポートの要件（1.157 の `ReportToJSON` の仕様）:**
 
-- 形式は **表形式（TABULAR）**。1 列目が **友だち: ID（`CUST_ID`）**。2 列目以降はそのまま `insert_1`, `insert_2` … の差し込み値になる（表示ラベルが入る。例: 友だち: 表示名 → `{!insert_1}`）
-- レポートタイプは友だちの標準レポートタイプ **`CustomEntity$igns__SocialFriend__c`**（「友だち」）。リード／取引先責任者の項目で絞りたい場合は `CustomEntity$igns__SocialFriend__c@igns__SocialFriend__c.igns__Lead__c`（リードが関連する友だち）などの派生タイプがある
+- 形式は **表形式（TABULAR）**。1列目が **友だちレコードId**。友だち基準の標準レポートでは `CUST_ID`。2列目以降は `insert_1`, `insert_2` … の差し込み値になる（表示ラベルが入る）
+- 基本は友だちの標準レポートタイプ **`CustomEntity$igns__SocialFriend__c`**。関連するLead / Contactの項目で絞る派生タイプは対象orgで確認する。Lead / Contact基準でも、実在する友だちLookupまたは関連する友だちIdを1列目にできれば使用できる
+- Lead / ContactのLookupは通常 `SocialFriend_<LampId>__c` だが存在を仮定しない。公式アカウントの `LeadField__c` / `ContactField__c` とdescribeを [照合する](../lamp-setup/references/social-friend-fields.md)。`CUST_ID` が何のIdかはレポートタイプによって違う
 - 同じ友だちが複数行あっても 1 通だけ送る（`igns__AllowDuplicate__c` は CSV と同じ）
-- 「範囲（scope）」は **すべての友だち（`organization`）** にする。API で作ると既定が「私の友だち（`user`）」になり、スケジュールした人が所有する友だちしか対象にならない
+- 友だち基準の例の「範囲（scope）」は **すべての友だち（`organization`）**。APIで作ると既定が「私の友だち（`user`）」になり得る。Lead / Contact等の別タイプは利用可能なscopeと実際の対象範囲を確認する
 - 集計・グループ化・グラフは不要。フィルタで絞るだけにする
 
 ### レポートの列名を調べる
@@ -99,7 +101,7 @@ python3 -c "import json; d=json.load(open('/tmp/rt.json'))['reportTypeMetadata']
 
 | 列名 | 意味 | 型 |
 |---|---|---|
-| `CUST_ID` | 友だち: ID（**必ず 1 列目**） | id |
+| `CUST_ID` | この友だち基準タイプでは友だち: ID（**必ず1列目**。別タイプに流用しない） | id |
 | `CUST_NAME` | 友だち: 表示名（LINE の表示名。差し込みに便利） | string |
 | `CUST_CREATED_DATE` | 友だち: 作成日（= 友だち追加日。ステップ配信の起点） | date |
 | `igns__SocialFriend__c.igns__IsBlocked__c` | ブロック? | boolean |
@@ -155,17 +157,12 @@ AND/OR を混ぜるときは `"reportBooleanFilter": "1 AND (2 OR 3)"`（番号�
 
 ### 実行して確認（必ず）
 
-```bash
-sf api request rest "/services/data/v67.0/analytics/reports/<reportId>?includeDetails=true" -o <org> > /tmp/run.json
-python3 -c "
-import json; d=json.load(open('/tmp/run.json')); rows=d['factMap']['T!T']['rows']
-print('rows', len(rows), 'allData', d['allData']); print('cols', d['reportMetadata']['detailColumns'])
-for r in rows[:5]: print([(c.get('label'), c.get('value')) for c in r['dataCells']])"
-```
+[先頭列と宛先の検証手順](references/report-validation.md) に従い、レポート実行結果・describe・宛先照合結果を `scripts/validate_report.py` で確認する。
 
-- `rows` が対象人数（承認時にユーザーへ提示する値）。`allData: false` なら 2,000 行で切れている → CSV モードか分割
-- 1 列目の `value` が友だち Id（`a0G…`）であること。`CUST_NAME` を 1 列目にすると表示名が Id として送られて全員失敗する
-- 0 行なら条件かスコープ（`scope: user` になっていないか）を疑う
+- 先頭列の元項目が友だちId／友だちLookupであることと、**全行**の値を検証する。友だちIdの接頭辞は対象orgのdescribeから取得し、固定しない
+- `allData=false` なら不完全な結果なのでCSVか分割へ切り替える
+- 人数は既定の重複排除なら `uniqueFriends`、重複行を含む件数は `rows` として分けて伝える
+- 0行では実値の検証済みとしない。条件・スコープを調べ、将来条件の配信は同じ列構成での非0件の確認も行う
 
 
 ## ② 配信設定の作成（下書き）
@@ -289,7 +286,7 @@ sf api request rest "/services/data/v67.0/sobjects/igns__BroadcastFieldSetting__
 **運用上の注意:**
 
 - 起点は「友だち: 作成日」= LAMP が友だちレコードを作った日。ブロック解除で戻ってきた人は作成日が古いのでステップに乗らない
-- **対象が 0 人の日は、履歴もエラーも残らない**（送信ジョブは正常終了し、配信サーバーは何も作らない）。繰り返しは `working` のまま `lastSentAt` が更新されず次回へ進む。単発（Once）は `end` になるが履歴が無いので `phase=sending` → しばらくして `no_history` になる。「今日の対象が 0 人だったのか、配信が壊れたのか」は状態からは区別できないので、レポートをその場で実行して行数を見る（0 行なら正常）
+- **対象が0人の日は、履歴もエラーも残らない**場合がある。繰り返しは `working` のまま `lastSentAt` が更新されず次回へ進み、単発は `end` でも履歴がないため `no_history` になり得る。現在のレポートが0行でも、配信時点が正常だったとは断定しない。フィルタ・日付・送信済みフラグ・データの変更と当時のジョブを確認する
 - 3 ステップなら CronTrigger は「同じ人 × 同じ cron」で 1 本にまとまる（1.157）。時刻をそろえると枠を消費しない
 - 途中でレポートの条件を変えるのは自由（配信設定はレポート Id しか持たない）。テンプレートや cron を変えるときはキャンセル → 下書き
 
@@ -307,7 +304,7 @@ sf data query -q "SELECT COUNT() FROM CronTrigger WHERE CronJobDetail.JobType = 
 
 Report モードはさらに:
 
-- ①′ の「実行して確認」で行数（対象人数）と 1 列目が友だち Id であることを確認する
+- ①′ の検証で列の元項目、全行の友だちId、実在、公式アカウントを確認し、行数と重複除外後の人数を区別する
 - スケジュールする人（＝いまの `sf` の認証ユーザー）がそのレポートを実行できること（上の GET が通れば OK）
 - 繰り返しなら「毎回同じ人に届く条件か、一度だけ届く条件か」を言葉にしてユーザーに確認する
 

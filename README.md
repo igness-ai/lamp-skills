@@ -12,6 +12,7 @@ Claude Code・Codex・Blaze をはじめ、Salesforce CLI（`sf`）を実行で�
 | [`lamp-richmenu`](skills/lamp-richmenu/SKILL.md) | リッチメニューを作成・検証・LINE に発行し、デフォルト設定・友だち個別の割当・差し替え・削除まで行う | Igness LAMP **1.157 以降** |
 | [`lamp-coupon`](skills/lamp-coupon/SKILL.md) | LINE クーポンを作成・検証・発行し、テンプレートへの組み込み、内容変更（複製→再発行）、終了まで行う | Igness LAMP **1.157 以降** |
 | [`lamp-agentforce`](skills/lamp-agentforce/SKILL.md) | 自動応答の種別を Agentforce に設定し、開始条件・ボタン起動・会話継続の確認・停止まで行う | Igness LAMP **1.157 以降**＋利用可能な Agentforce エージェント |
+| [`lamp-bot`](skills/lamp-bot/SKILL.md) | Bot自動応答の条件と固定テンプレートを設定し、受付カード・リッチメニューからAgentforceへつなぐ構成をまとめて作る | Igness LAMP **1.157 以降**。AIへの接続には利用可能なAgentforceエージェントも必要 |
 | [`lamp-chat`](skills/lamp-chat/SKILL.md) | チャットコンポーネントの配置・高さ・QuickText・送信元を設定し、Prompt Builderの返信ドラフトを接続する | Igness LAMP **1.157 以降**。返信ドラフトは利用可能なプロンプトテンプレートも必要 |
 
 ## インストール
@@ -23,21 +24,21 @@ Claude Code・Codex・Blaze をはじめ、Salesforce CLI（`sf`）を実行で�
 /plugin install lamp@lamp-skills
 ```
 
-以後は「LAMP をセットアップして」「LAMP に画像をアップロードして」「LAMP でカードメッセージのテンプレートを作って」「毎朝 9 時に配信して」「リッチメニューを発行して」「クーポンを作って」「LINE の自動応答を Agentforce にして」「チャットの返信ドラフトと送信元を設定して」のように依頼するだけで、対応するスキルが使われます。
+以後は「LAMP をセットアップして」「LAMP に画像をアップロードして」「LAMP でカードメッセージのテンプレートを作って」「毎朝 9 時に配信して」「リッチメニューを発行して」「クーポンを作って」「LINE の自動応答を Agentforce にして」「Botで問い合わせ内容を選んでAgentforceにつなぐ受付を一式作って」「チャットの返信ドラフトと送信元を設定して」のように依頼するだけで、対応するスキルが使われます。
 更新は `/plugin update lamp@lamp-skills` で取り込めます。
 
 ### Blaze
 
-[Blaze](https://blaze.igness.ai/) は Skills に対応しています。設定 → Skills の「Skill を追加」で、`skills/<name>` フォルダを ZIP にして「アップロード」するか、「新規作成」で `SKILL.md` の内容を貼り付けてください。チャットでは `/<name>`（例: `/lamp-setup`）で呼び出せます。詳しくは [Blaze ヘルプ「スキル（Skills）」](https://blaze.igness.ai/help/settings/skills) を参照してください。
+[Blaze](https://blaze.igness.ai/) は Skills に対応しています。設定 → Skills の「Skill を追加」で、`skills/<name>` フォルダを ZIP にして「アップロード」します。参照資料やスクリプトを使うスキルは `SKILL.md` だけの貼り付けでは不足するため、`references/`・`scripts/` も含めてください。複数スキルを組み合わせる受付構築では、参照先のスキルも同じ階層へ導入します。チャットでは `/<name>`（例: `/lamp-setup`）で呼び出せます。詳しくは [Blaze ヘルプ「スキル（Skills）」](https://blaze.igness.ai/help/settings/skills) を参照してください。
 
 ### 手動コピー（Codex / その他のエージェント）
 
-`skills/<name>/SKILL.md` を、作業フォルダのスキル置き場にコピーします。
+`skills/` 以下のスキルフォルダを、`references/`・`scripts/` を含めて同じ階層へコピーします。組み合わせて使うスキルも導入してください。
 
 | エージェント | コピー先 |
 | --- | --- |
-| Claude Code | `.claude/skills/<name>/SKILL.md` |
-| Codex | `.agents/skills/<name>/SKILL.md` |
+| Claude Code | `.claude/skills/<name>/` |
+| Codex | `.agents/skills/<name>/` |
 
 ```bash
 git clone https://github.com/igness-ai/lamp-skills.git
@@ -65,6 +66,7 @@ cp -R lamp-skills/skills/* .claude/skills/
 
 | lamp-skills | LAMP パッケージ |
 | --- | --- |
+| 1.5.x | 1.4.x に `lamp-bot`、受付からAgentforceへの接続手順、レポートの宛先検証、参照項目の確認、テンプレートの詳細制約を追加 |
 | 1.4.x | 1.3.x に `lamp-agentforce` / `lamp-chat` を追加（基本パッケージ 1.157 以降を対象。自動応答にはAgentforceエージェント、返信ドラフトにはプロンプトテンプレートが必要） |
 | 1.3.x | 1.2.x と同じ。REST 呼び出しを API v67.0 に統一、`lamp-broadcast` にレポート配信・繰り返し・ステップ配信を追加 |
 | 1.2.x | 1.157 以降を推奨（`lamp-broadcast` / `lamp-richmenu` / `lamp-coupon` は 1.157 以降で動作。他は 1.1.x と同じ） |

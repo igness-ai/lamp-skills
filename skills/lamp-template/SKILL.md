@@ -7,7 +7,9 @@ description: Igness LAMP のテンプレート（LINEで1回に送るメッセ�
 
 LAMP のテンプレートは、**テンプレート（`igns__Template__c`）という箱**の中に**テンプレートメッセージ（`igns__TemplateMessage__c`）**を順番に並べたもの。
 メッセージは保存するとトリガーが LINE 仕様に照らして検証し、**有効（`igns__IsValid__c`）** と **有効化エラー（`igns__ValidationErrors__c`、日本語の理由）** を書き込む。
-保存はブロックされないので、「保存 → `ValidationErrors__c` を読む → 直す」を繰り返せば必ず有効化できる。
+保存自体が通っても送信できるとは限らない。「保存 → `ValidationErrors__c` を読む → 原因に対応する修正」で確認する。
+
+種別を決めたら [種別ごとの細かい設定・制約](references/message-constraints.md) の該当箇所を読む。Bot受付やAgentforceへの分岐を組むときは [アクションの接続と項目代入](references/actions.md)、一式の構築は `lamp-bot` を使う。
 
 ```
 ① 素材の準備        画像・動画は lamp-media-upload スキルでアップロードして公開URLを得る
@@ -91,13 +93,13 @@ sf api request rest "/services/data/v67.0/sobjects/igns__TemplateMessage__c/<msg
 | 値 | 意味 | 必須 | 任意 |
 |---|---|---|---|
 | `uri` | リンクを開く | `ActionUrl`（255字） | |
-| `message` | メッセージ送信 | `ActionMessage`（255字） | |
+| `message` | メッセージ送信 | `ActionMessage`（対象orgの項目長とLINEの上限を確認） | |
 | `postback` | テンプレート呼出 | `ActionTemplate`（Template__c の Id） | `ActionMessage`（タップ時に表示するテキスト）、`ActionOption`（`openKeyboard` などLINE側の動作）、`ActionFillInText`（キーボードに入れる文字）、項目の代入 |
 | `callagent` | AIエージェント呼出 | `ActionReply`（`igns__Reply__c` の Id） | `ActionMessage`、`ActionOption`、`ActionFillInText` |
 
 Agentforce の自動応答を呼び出す場合は、`lamp-agentforce` で種別 `Agentforce` の自動応答を作成し、その Id を `ActionReply` に設定する。
 
-ボタンには `ActionLabel`（ボタンの文字、20字。カード（画像のみ）は12字）も必須。
+通常のボタンには `ActionLabel`（20字）が必須。画像のみカードはラベル任意・12字以内、カードの画像タップ用アクションはラベル不要。
 
 #### text
 
@@ -150,11 +152,11 @@ Agentforce の自動応答を呼び出す場合は、`lamp-agentforce` で種別
 | `igns__ImageAspectRatio1__c` | `rectangle`（横長 1.51:1、既定）または `square`（1:1）。全カード共通 |
 | `igns__ImageUrl{n}__c` | カード n の画像URL（任意。1024×678 または 1024×1024） |
 | `igns__Title{n}__c` | タイトル（任意、40字） |
-| `igns__Text{n}__c` | テキスト（**必須**、60字） |
+| `igns__Text{n}__c` | テキスト（**必須**）。画像またはタイトルがあれば60字以内。それらがない場合の上限は [種別ごとの制約](references/message-constraints.md) を参照 |
 | `igns__ActionType{n}__c` … | 画像タップ時のアクション（任意、ラベル不要） |
 | `igns__ActionType{nm}__c` + `ActionLabel{nm}` … | ボタン m（1〜3）。**各カードに1つ以上、かつ全カードで同数** |
 
-カードは 1〜9 枚。項目が1つでも入っているカードは「存在する」とみなされるので、作りかけのカードを残さない。
+カードは 1〜9 枚。画像・タイトルの有無とボタン数を全カードで揃える。作りかけのカードを残さない。1枚の場合はLINEのbuttonsへ変換され、画像タップ用アクションは出力されないので明示的なボタンを使う。
 
 #### confirm（設問（2択））
 
@@ -199,7 +201,7 @@ sf data query -q "SELECT Id, Name, igns__CouponId__c, igns__EndDateTime__c FROM 
 sf data query -q "SELECT Id, Name, igns__Type__c, igns__Sort__c, igns__IsValid__c, igns__ValidationErrors__c FROM igns__TemplateMessage__c WHERE igns__Template__c = '<templateId>' ORDER BY igns__Sort__c" -o <org>
 ```
 
-- `igns__IsValid__c = true` になれば LINE に送れる状態
+- `igns__IsValid__c = true` はLAMP側の検証通過。LINE側の長さ・画像・Flex内部・差し込み結果と接続先は [追加の確認](references/message-constraints.md) が必要
 - `false` のときは `igns__ValidationErrors__c` に理由が 1行1件（API名つき）で入る。例 `カード1 ボタン1: URL（ActionUrl11__c）を入力してください` → その項目を PATCH して再確認
 - 無効なメッセージは配信時に**黙って除外**される（配信は失敗しない）。全件 `true` を確認してから次へ進む
 
@@ -225,19 +227,19 @@ sf api request rest "/services/data/v67.0/sobjects/igns__Template__c/<templateId
 
 ## ⑥ 項目の代入（任意）
 
-ボタンがタップされたときに友だち（`igns__SocialFriend__c`）の項目へ値を入れる設定。`igns__TemplateFieldSetting__c` に1行1項目。
+テンプレートの処理時に友だち（`igns__SocialFriend__c`）の項目へ値を入れる設定。`igns__TemplateFieldSetting__c` に1行1項目。作成前に [接続先の向きと現在の制限](references/actions.md) を確認する。
 
 | 項目 | 内容 |
 |---|---|
-| `igns__Template__c` | テンプレートの Id（必須） |
+| `igns__Template__c` | **呼び出し先（送られる）テンプレート**の Id（必須） |
 | `Name` | 友だちオブジェクトの項目API名（例 `igns__TestDeliveryDisplayName__c`、カスタム項目なら `Interest__c`） |
-| `igns__Condition__c` | `EQ`（次の文字列と一致する＝置き換え）/ `ADD`（追加）/ `BLANK`（空白にする） |
+| `igns__Condition__c` | `EQ`（型変換して置き換え）/ `ADD`（文字列のカンマ連結。既存値への追記保証はない）/ `BLANK`（nullにする） |
 | `igns__Value__c` | 値 |
-| `igns__SourcedRecordId__c` | どのボタンか: テンプレートメッセージの Id（返信ボタンならテンプレートの Id） |
+| `igns__SourcedRecordId__c` | **押した側**のテンプレートメッセージId（返信ボタンならTemplateId、リッチメニューならRichMenuId） |
 | `igns__SourcedActionId__c` | そのボタンの添字文字列（カード2ボタン1なら `"21"`、設問のボタン2なら `"12"`、返信ボタン3なら `"3"`） |
 
 `SourcedRecordId__c` と `SourcedActionId__c` を両方空にすると、**テンプレート送信時に必ず**適用される共通設定になる。
-選択肢ごとの代入が効くのは、そのボタンのアクション種類が `postback`（テンプレート呼出）または `callagent` のときだけ。
+ボタン別の代入は `postback`（テンプレート呼出）で送られる呼出元情報に一致させる。現行の `callagent` 経路はこの情報を開始テンプレートへ引き継がないため、ボタン別代入は使えると仮定しない。画像のみカードの番号にも制限があるので、上記の詳細を読む。
 
 ## ⑦ テスト配信
 
@@ -262,7 +264,7 @@ Actions API の `isSuccess: true` は**ジョブを投入できた**という意
 sf data query -q "SELECT Status, ExtendedStatus, CompletedDate FROM AsyncApexJob WHERE ApexClass.Name = 'SendPushMessageFromSocialAccount' ORDER BY CreatedDate DESC LIMIT 1" -o <org>
 ```
 
-- `Status = Completed` かつ `ExtendedStatus` が空 → 送信成功
+- `Status = Completed` かつ `ExtendedStatus` が空 → ジョブ完了。該当時刻・実行ユーザーで今回のジョブかを確認し、LINEの着信は別途確認する
 - `Status = Failed` → `ExtendedStatus` に理由（`Coupon not found`、`送信できる有効なメッセージがありません` など）
 
 ## トラブルシューティング
