@@ -19,7 +19,7 @@ description: Igness LAMP の LINE クーポンを Salesforce CLI でヘッドレ
 ## 前提条件
 
 - LAMP 基本パッケージ **1.157 以降**（発行・終了・複製アクション）
-- `sf` CLI で対象 org に認証済み（以下 `<org>`）。API バージョン v66.0 以上
+- `sf` CLI で対象 org に認証済み（以下 `<org>`）。API バージョン v67.0 以上
 - 実行ユーザーに `LAMP_SystemAdministrator` または `LAMP_MarketingAdministrator` 権限セットグループ
 - 公式アカウント（`igns__SocialAccount__c`）が接続済み
 - **必ず最初に対象 org をユーザーに確認する**（顧客の本番 org を扱うため）
@@ -50,7 +50,7 @@ cat > /tmp/cp.json <<'EOF'
   "igns__Visibility__c": "UNLISTED",
   "igns__UsageCondition__c": "他の割引との併用不可" }
 EOF
-sf api request rest "/services/data/v66.0/sobjects/igns__Coupon__c" --method POST -b @/tmp/cp.json -o <org>
+sf api request rest "/services/data/v67.0/sobjects/igns__Coupon__c" --method POST -b @/tmp/cp.json -o <org>
 ```
 
 | 項目 | 必須 | 内容 |
@@ -86,7 +86,7 @@ sf api request rest "/services/data/v66.0/sobjects/igns__Coupon__c" --method POS
 発行前に、名前・リワード・有効期間・公開範囲をユーザーに提示して承認を得る。
 
 ```bash
-sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampIssueCouponAction" --method POST -b '{"inputs":[{"couponId":"<couponId>"}]}' -o <org>
+sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampIssueCouponAction" --method POST -b '{"inputs":[{"couponId":"<couponId>"}]}' -o <org>
 ```
 
 - 成功: `outputValues.success=true`、`lineCouponId`、`isActive=true`。レコードの `igns__CouponId__c` が入る
@@ -110,7 +110,7 @@ sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampIssueCou
 cat > /tmp/msg.json <<'EOF'
 { "igns__Template__c": "<templateId>", "igns__Type__c": "coupon", "igns__Coupon__c": "<couponId>", "igns__Sort__c": 1 }
 EOF
-sf api request rest "/services/data/v66.0/sobjects/igns__TemplateMessage__c" --method POST -b @/tmp/msg.json -o <org>
+sf api request rest "/services/data/v67.0/sobjects/igns__TemplateMessage__c" --method POST -b @/tmp/msg.json -o <org>
 ```
 
 未発行（`igns__CouponId__c` 空）や終了済みのクーポンを参照するメッセージは、送信時に黙って除外される。配信前に `igns__CouponId__c` があり `igns__IsActive__c=true` であることを確認する。
@@ -118,7 +118,7 @@ sf api request rest "/services/data/v66.0/sobjects/igns__TemplateMessage__c" --m
 ## ⑤ 内容を変える（複製 → 修正 → 発行）
 
 ```bash
-sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampCloneCouponAction" --method POST -b '{"inputs":[{"sourceCouponId":"<couponId>","newName":"秋の温泉30%OFF"}]}' -o <org>
+sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampCloneCouponAction" --method POST -b '{"inputs":[{"sourceCouponId":"<couponId>","newName":"秋の温泉30%OFF"}]}' -o <org>
 ```
 
 - `newCouponId` に未発行の複製が返る（発行結果は複製しない）。`newName` 省略時は「（コピー）」付き
@@ -130,14 +130,14 @@ sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampCloneCou
 1 回目は `confirmClose` なしで呼び、影響（参照しているテンプレートメッセージ数など）を確認する:
 
 ```bash
-sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampCloseCouponAction" --method POST -b '{"inputs":[{"couponId":"<couponId>"}]}' -o <org>
+sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampCloseCouponAction" --method POST -b '{"inputs":[{"couponId":"<couponId>"}]}' -o <org>
 # → needsConfirmation=true, message に影響の説明, referencingTemplateMessages=件数
 ```
 
 ユーザーの承認を得てから実行:
 
 ```bash
-sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampCloseCouponAction" --method POST -b '{"inputs":[{"couponId":"<couponId>","confirmClose":true}]}' -o <org>
+sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampCloseCouponAction" --method POST -b '{"inputs":[{"couponId":"<couponId>","confirmClose":true}]}' -o <org>
 ```
 
 成功すると LINE 側で終了（CLOSED）し、`igns__IsActive__c=false` になる。終了は取り消せない。

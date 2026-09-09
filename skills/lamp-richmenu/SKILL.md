@@ -20,7 +20,7 @@ description: Igness LAMP のリッチメニュー（LINE トーク画面下部�
 ## 前提条件
 
 - LAMP 基本パッケージ **1.157 以降**（発行・削除アクション、有効化エラー項目）
-- `sf` CLI で対象 org に認証済み（以下 `<org>`）。API バージョン v66.0 以上
+- `sf` CLI で対象 org に認証済み（以下 `<org>`）。API バージョン v67.0 以上
 - 実行ユーザーに `LAMP_SystemAdministrator` または `LAMP_MarketingAdministrator` 権限セットグループ
 - 公式アカウント（`igns__SocialAccount__c`）が接続済み
 - **必ず最初に対象 org をユーザーに確認する**（顧客の本番 org を扱うため）
@@ -60,7 +60,7 @@ cat > /tmp/rm.json <<'EOF'
   "igns__ActionType2__c": "postback", "igns__ActionTemplate2__c": "<templateId>", "igns__ActionMessage2__c": "資料請求",
   "igns__ActionType3__c": "callagent","igns__ActionReply3__c": "<replyId>", "igns__ActionMessage3__c": "相談する" }
 EOF
-sf api request rest "/services/data/v66.0/sobjects/igns__RichMenu__c" --method POST -b @/tmp/rm.json -o <org>
+sf api request rest "/services/data/v67.0/sobjects/igns__RichMenu__c" --method POST -b @/tmp/rm.json -o <org>
 ```
 
 | 項目 | 内容 |
@@ -94,7 +94,7 @@ sf data query -q "SELECT igns__IsValid__c, igns__ValidationErrors__c, igns__IsAc
 cat > /tmp/pub.json <<'EOF'
 { "inputs": [ { "richMenuId": "<richMenuId>" } ] }
 EOF
-sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampPublishRichMenuAction" --method POST -b @/tmp/pub.json -o <org>
+sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampPublishRichMenuAction" --method POST -b @/tmp/pub.json -o <org>
 ```
 
 - `mode` を省略すると自動（`igns__RichMenuId__c` が空なら新規発行、あれば差し替え）。明示するなら `"mode": "create"` / `"mode": "update"`
@@ -118,7 +118,7 @@ sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampPublishR
 **デフォルトメニュー（公式アカウントの全友だち）**: 公式アカウントの `igns__DefaultRichMenu__c` に発行済みメニューの Id を入れる。処理は非同期なので `igns__RichMenuStatus__c` をポーリングする（`updating` → `valid` / `error`）。
 
 ```bash
-sf api request rest "/services/data/v66.0/sobjects/igns__SocialAccount__c/<socialAccountId>" --method PATCH -b '{"igns__DefaultRichMenu__c":"<richMenuId>"}' -o <org>
+sf api request rest "/services/data/v67.0/sobjects/igns__SocialAccount__c/<socialAccountId>" --method PATCH -b '{"igns__DefaultRichMenu__c":"<richMenuId>"}' -o <org>
 sf data query -q "SELECT igns__RichMenuStatus__c, igns__RichMenuErrorMessage__c FROM igns__SocialAccount__c WHERE Id = '<socialAccountId>'" -o <org>
 ```
 
@@ -134,7 +134,7 @@ sf data query -q "SELECT igns__RichMenuStatus__c, igns__RichMenuErrorMessage__c 
 - **削除**:
 
 ```bash
-sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampDeleteRichMenuAction" --method POST -b '{"inputs":[{"richMenuId":"<richMenuId>"}]}' -o <org>
+sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampDeleteRichMenuAction" --method POST -b '{"inputs":[{"richMenuId":"<richMenuId>"}]}' -o <org>
 ```
 
 LINE 側から削除され、レコードは未発行（`igns__IsActive__c=false`、`igns__RichMenuId__c` 空）に戻る。デフォルトや友だちに割り当て中のメニューを削除すると、その人たちのメニューは消える。先に別メニューへ切り替えるか、ユーザーに影響を伝えて承認を得る。

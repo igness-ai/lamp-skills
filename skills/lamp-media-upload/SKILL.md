@@ -18,7 +18,7 @@ UI の fileUploader と同じ経路を、2つの global アクション（Action
 
 - LAMP 基本パッケージ 1.155 以降がインストール済み、サーバー認証（設定タブ）完了済み
 - 実行ユーザーに `LAMP_SystemAdministrator` または `LAMP_MarketingAdministrator` 権限セットグループ
-- `sf` CLI で対象 org に認証済み（以下 `<org>`）。API バージョンは v66.0 以上
+- `sf` CLI で対象 org に認証済み（以下 `<org>`）。API バージョンは v67.0 以上
 
 ## 種別（contentType）と保存先
 
@@ -39,7 +39,7 @@ UI の fileUploader と同じ経路を、2つの global アクション（Action
 ### ① アップロードURLの発行
 
 ```bash
-sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampGetUploadUrlAction" --method POST \
+sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampGetUploadUrlAction" --method POST \
   -b '{"inputs":[{"contentType":"imagemap","fileExtension":"png"}]}' -o <org>
 ```
 
@@ -60,7 +60,7 @@ curl -sS -o /dev/null -w "%{http_code}\n" -X PUT \
 ### ③ アップロード完了（公開URL取得＋レコード更新）
 
 ```bash
-sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampCompleteUploadAction" --method POST \
+sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampCompleteUploadAction" --method POST \
   -b '{"inputs":[{"customId":"<customId>","contentType":"imagemap","fileExtension":"png",
        "recordId":"<TemplateMessage__cのId>","imageUrlField":"igns__OriginalContentUrl__c","uuidField":"igns__UUID__c"}]}' -o <org>
 ```

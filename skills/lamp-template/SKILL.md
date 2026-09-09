@@ -22,7 +22,7 @@ LAMP のテンプレートは、**テンプレート（`igns__Template__c`）と
 ## 前提条件
 
 - LAMP 基本パッケージ **1.156 以降**（有効化エラー項目・送信時組み立ては 1.155 以降）
-- `sf` CLI で対象 org に認証済み（以下 `<org>`）。API バージョン v66.0 以上
+- `sf` CLI で対象 org に認証済み（以下 `<org>`）。API バージョン v67.0 以上
 - 実行ユーザーに `LAMP_SystemAdministrator` または `LAMP_MarketingAdministrator` 権限セットグループ
 - **必ず最初に対象 org をユーザーに確認する**（顧客の本番 org を扱うため）
 - 画像・動画の URL は LAMP のコンテンツ配信基盤のもの（`lamp-media-upload` スキルでアップロード）を使う。リンク付き画像は **拡張子なしの imagemap 用 URL** が必須
@@ -42,7 +42,7 @@ LAMP のテンプレートは、**テンプレート（`igns__Template__c`）と
 cat > /tmp/tpl.json <<'EOF'
 { "Name": "秋の温泉キャンペーン" }
 EOF
-sf api request rest "/services/data/v66.0/sobjects/igns__Template__c" --method POST -b @/tmp/tpl.json -o <org>
+sf api request rest "/services/data/v67.0/sobjects/igns__Template__c" --method POST -b @/tmp/tpl.json -o <org>
 # → {"id":"a0K...","success":true}
 ```
 
@@ -63,13 +63,13 @@ cat > /tmp/msg.json <<'EOF'
 { "igns__Template__c": "<templateId>", "igns__Type__c": "text", "igns__Sort__c": 1,
   "igns__Text__c": "箱根・草津・別府の秋の温泉プランをご用意しました♨\n11月30日まで最大20%OFFです。" }
 EOF
-sf api request rest "/services/data/v66.0/sobjects/igns__TemplateMessage__c" --method POST -b @/tmp/msg.json -o <org>
+sf api request rest "/services/data/v67.0/sobjects/igns__TemplateMessage__c" --method POST -b @/tmp/msg.json -o <org>
 ```
 
 修正は PATCH:
 
 ```bash
-sf api request rest "/services/data/v66.0/sobjects/igns__TemplateMessage__c/<msgId>" --method PATCH -b @/tmp/patch.json -o <org>
+sf api request rest "/services/data/v67.0/sobjects/igns__TemplateMessage__c/<msgId>" --method PATCH -b @/tmp/patch.json -o <org>
 ```
 
 ### タイプ別の項目
@@ -216,7 +216,7 @@ cat > /tmp/qr.json <<'EOF'
   "igns__ActionType2__c": "postback", "igns__ActionLabel2__c": "他のプランを見る", "igns__ActionTemplate2__c": "<別テンプレートId>",
   "igns__ActionType3__c": "camera", "igns__ActionLabel3__c": "写真を送る" }
 EOF
-sf api request rest "/services/data/v66.0/sobjects/igns__Template__c/<templateId>" --method PATCH -b @/tmp/qr.json -o <org>
+sf api request rest "/services/data/v67.0/sobjects/igns__Template__c/<templateId>" --method PATCH -b @/tmp/qr.json -o <org>
 ```
 
 ## ⑥ 項目の代入（任意）
@@ -249,7 +249,7 @@ sf data query -q "SELECT Id, Name FROM igns__SocialFriend__c WHERE igns__IsTest_
 cat > /tmp/send.json <<'EOF'
 { "inputs": [ { "socialFriendId": "<socialFriendId>", "templateId": "<templateId>", "flowName": "lamp-template-skill" } ] }
 EOF
-sf api request rest "/services/data/v66.0/actions/custom/apex/igns__SendPushMessageFromSocialAccount" --method POST -b @/tmp/send.json -o <org>
+sf api request rest "/services/data/v67.0/actions/custom/apex/igns__SendPushMessageFromSocialAccount" --method POST -b @/tmp/send.json -o <org>
 ```
 
 Actions API の `isSuccess: true` は**ジョブを投入できた**という意味しかない。実際の結果は非同期ジョブで確認する（10秒ほど待つ）:

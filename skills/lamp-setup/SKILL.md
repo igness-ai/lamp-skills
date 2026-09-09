@@ -21,7 +21,7 @@ LAMP/BRAINパッケージ（バージョン1.153以降）をインストール�
 パッケージのインストールでは組織のメタデータは変更されない（バージョン 1.157 以降）。権限セットグループ 6 件・ローカル権限セット・スケジュールジョブ 3 件（日次 2 件・配信終了処理の毎時 1 件）は、次のアクションで管理者の権限で作成する（冪等・何度実行しても安全。既に揃っている組織では何も作らず `executed: false` を返す）:
 
 ```bash
-sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampAutoSetupAction" --method POST -b '{"inputs":[{}]}' -o <org>
+sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampAutoSetupAction" --method POST -b '{"inputs":[{}]}' -o <org>
 ```
 
 実行後に結果を確認する:
@@ -59,7 +59,7 @@ sf data create record -s PermissionSetAssignment -v "AssigneeId=<autoprocUserId>
 まず現在の認証状態を確認する:
 
 ```bash
-sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampPathAssistantAction" --method POST -b '{"inputs":[{}]}' -o <org>
+sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampPathAssistantAction" --method POST -b '{"inputs":[{}]}' -o <org>
 ```
 
 `status` が `enabled` / `disabled` なら認証済み → Step 4へ。`unauthenticated` なら以下を実行:
@@ -69,9 +69,9 @@ sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampPathAssi
 
 ```bash
 # トライアルの場合（契約なし）
-sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampStartServerAuthAction" --method POST -b '{"inputs":[{}]}' -o <org>
+sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampStartServerAuthAction" --method POST -b '{"inputs":[{}]}' -o <org>
 # 契約がある場合
-sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampStartServerAuthAction" --method POST -b '{"inputs":[{"contractId":"<契約ID>","accessKey":"<アクセスキー>"}]}' -o <org>
+sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampStartServerAuthAction" --method POST -b '{"inputs":[{"contractId":"<契約ID>","accessKey":"<アクセスキー>"}]}' -o <org>
 ```
 
 3. 結果の `prepared` が `true` の場合は資格情報の初期化だけが行われた状態。**同じコマンドをもう一度実行**すると `authUrl` が返る
@@ -81,7 +81,7 @@ sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampStartSer
 ## Step 4: パスの有効化
 
 ```bash
-sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampPathAssistantAction" --method POST -b '{"inputs":[{"enable":true}]}' -o <org>
+sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampPathAssistantAction" --method POST -b '{"inputs":[{"enable":true}]}' -o <org>
 ```
 
 `status: enabled` になれば完了。
@@ -93,7 +93,7 @@ sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampPathAssi
 ユーザーに **LINE DevelopersのMessaging APIチャネルのチャネルIDとチャネルシークレット** を確認する（LINE Developers → 対象チャネル → チャネル基本設定）。アカウント名は接続時にLINE側から自動取得されるため**ユーザーには聞かない**。
 
 ```bash
-sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampStartChannelConnectionAction" --method POST \
+sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampStartChannelConnectionAction" --method POST \
   -b '{"inputs":[{"channelId":"<チャネルID>","channelSecret":"<チャネルシークレット>"}]}' -o <org>
 ```
 
@@ -106,7 +106,7 @@ sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampStartCha
 ユーザーに **LINEログインチャネルのチャネルIDとチャネルシークレット** を確認する（未作成の場合はLINE Developersで「LINEログイン」チャネルを新規作成してもらう）。
 
 ```bash
-sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampCompleteChannelConnectionAction" --method POST \
+sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampCompleteChannelConnectionAction" --method POST \
   -b '{"inputs":[{"lampId":"<5-1で取得したlampId>","name":"<5-1のbotDisplayName>","loginChannelId":"<ログインチャネルID>","loginChannelSecret":"<ログインチャネルシークレット>"}]}' -o <org>
 ```
 
@@ -124,7 +124,7 @@ sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampComplete
 リード/取引先責任者と友だちを紐付ける場合のみ:
 
 ```bash
-sf api request rest "/services/data/v66.0/actions/custom/apex/igns__LampSetupRelationshipFieldsAction" --method POST \
+sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampSetupRelationshipFieldsAction" --method POST \
   -b '{"inputs":[{"socialAccountId":"<5-2で取得したrecordId>"}]}' -o <org>
 ```
 
