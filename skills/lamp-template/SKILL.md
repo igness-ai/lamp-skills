@@ -58,6 +58,8 @@ sf api request rest "/services/data/v67.0/sobjects/igns__Template__c" --method P
 | `igns__Sender__c` | 任意 | 送信元（`igns__Sender__c`）の Id。アイコンと表示名を差し替える |
 | `igns__AltText__c` | imagemap のみ必須 | PC版・通知欄での代替テキスト（255字）。他タイプは空なら送信時に自動補完 |
 
+送信元レコードの作成・表示名とアイコンの設定は `lamp-chat` を参照する。
+
 ```bash
 cat > /tmp/msg.json <<'EOF'
 { "igns__Template__c": "<templateId>", "igns__Type__c": "text", "igns__Sort__c": 1,
@@ -92,6 +94,8 @@ sf api request rest "/services/data/v67.0/sobjects/igns__TemplateMessage__c/<msg
 | `message` | メッセージ送信 | `ActionMessage`（255字） | |
 | `postback` | テンプレート呼出 | `ActionTemplate`（Template__c の Id） | `ActionMessage`（タップ時に表示するテキスト）、`ActionOption`（`openKeyboard` などLINE側の動作）、`ActionFillInText`（キーボードに入れる文字）、項目の代入 |
 | `callagent` | AIエージェント呼出 | `ActionReply`（`igns__Reply__c` の Id） | `ActionMessage`、`ActionOption`、`ActionFillInText` |
+
+Agentforce の自動応答を呼び出す場合は、`lamp-agentforce` で種別 `Agentforce` の自動応答を作成し、その Id を `ActionReply` に設定する。
 
 ボタンには `ActionLabel`（ボタンの文字、20字。カード（画像のみ）は12字）も必須。
 

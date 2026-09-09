@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "lamp",
-      "description": "Igness LAMP / BRAIN の初期セットアップ・メディアアップロード・テンプレート作成・一斉配信・リッチメニュー・クーポンを Salesforce CLI 経由で自動実行するスキル",
+      "description": "Igness LAMP / BRAIN の初期セットアップ・メディア・テンプレート・配信・リッチメニュー・クーポン・Agentforce自動応答・チャット設定を Salesforce CLI と設定画面で扱うスキル",
       "source": "./",
       "strict": false,
       "skills": [
@@ -17,9 +17,11 @@
         "./skills/lamp-template",
         "./skills/lamp-broadcast",
         "./skills/lamp-richmenu",
-        "./skills/lamp-coupon"
+        "./skills/lamp-coupon",
+        "./skills/lamp-agentforce",
+        "./skills/lamp-chat"
       ],
-      "version": "1.3.0",
+      "version": "1.4.0",
       "category": "productivity",
       "tags": [
         "salesforce",

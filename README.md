@@ -11,6 +11,8 @@ Claude Code・Codex・Blaze をはじめ、Salesforce CLI（`sf`）を実行で�
 | [`lamp-broadcast`](skills/lamp-broadcast/SKILL.md) | 一斉配信を作成・スケジュール・キャンセルし、配信の状態確認、配信結果（成功／失敗、個人別 CSV）、既読数・クリック数の取得まで行う。対象は CSV と Salesforce レポートの両方に対応し、レポート＋繰り返しでセグメント定期配信・友だち追加 N 日後のステップ配信を組む | Igness LAMP **1.157 以降** |
 | [`lamp-richmenu`](skills/lamp-richmenu/SKILL.md) | リッチメニューを作成・検証・LINE に発行し、デフォルト設定・友だち個別の割当・差し替え・削除まで行う | Igness LAMP **1.157 以降** |
 | [`lamp-coupon`](skills/lamp-coupon/SKILL.md) | LINE クーポンを作成・検証・発行し、テンプレートへの組み込み、内容変更（複製→再発行）、終了まで行う | Igness LAMP **1.157 以降** |
+| [`lamp-agentforce`](skills/lamp-agentforce/SKILL.md) | 自動応答の種別を Agentforce に設定し、開始条件・ボタン起動・会話継続の確認・停止まで行う | Igness LAMP **1.157 以降**＋利用可能な Agentforce エージェント |
+| [`lamp-chat`](skills/lamp-chat/SKILL.md) | チャットコンポーネントの配置・高さ・QuickText・送信元を設定し、Prompt Builderの返信ドラフトを接続する | Igness LAMP **1.157 以降**。返信ドラフトは利用可能なプロンプトテンプレートも必要 |
 
 ## インストール
 
@@ -21,7 +23,7 @@ Claude Code・Codex・Blaze をはじめ、Salesforce CLI（`sf`）を実行で�
 /plugin install lamp@lamp-skills
 ```
 
-以後は「LAMP をセットアップして」「LAMP に画像をアップロードして」「LAMP でカードメッセージのテンプレートを作って」「毎朝 9 時に配信して」「リッチメニューを発行して」「クーポンを作って」のように依頼するだけで、対応するスキルが使われます。
+以後は「LAMP をセットアップして」「LAMP に画像をアップロードして」「LAMP でカードメッセージのテンプレートを作って」「毎朝 9 時に配信して」「リッチメニューを発行して」「クーポンを作って」「LINE の自動応答を Agentforce にして」「チャットの返信ドラフトと送信元を設定して」のように依頼するだけで、対応するスキルが使われます。
 更新は `/plugin update lamp@lamp-skills` で取り込めます。
 
 ### Blaze
@@ -63,6 +65,7 @@ cp -R lamp-skills/skills/* .claude/skills/
 
 | lamp-skills | LAMP パッケージ |
 | --- | --- |
+| 1.4.x | 1.3.x に `lamp-agentforce` / `lamp-chat` を追加（基本パッケージ 1.157 以降を対象。自動応答にはAgentforceエージェント、返信ドラフトにはプロンプトテンプレートが必要） |
 | 1.3.x | 1.2.x と同じ。REST 呼び出しを API v67.0 に統一、`lamp-broadcast` にレポート配信・繰り返し・ステップ配信を追加 |
 | 1.2.x | 1.157 以降を推奨（`lamp-broadcast` / `lamp-richmenu` / `lamp-coupon` は 1.157 以降で動作。他は 1.1.x と同じ） |
 | 1.1.x | 1.156 以降を推奨（`lamp-setup` は 1.153 以降、`lamp-media-upload` は 1.155 以降、`lamp-template` は 1.156 以降で動作） |

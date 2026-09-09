@@ -1,7 +1,7 @@
 {
   "name": "lamp",
-  "description": "Igness LAMP / BRAIN の初期セットアップ・メディアアップロード・テンプレート作成・一斉配信・リッチメニュー・クーポンを Salesforce CLI 経由で自動実行するスキル",
-  "version": "1.3.0",
+  "description": "Igness LAMP / BRAIN の初期セットアップ・メディア・テンプレート・配信・リッチメニュー・クーポン・Agentforce自動応答・チャット設定を Salesforce CLI と設定画面で扱うスキル",
+  "version": "1.4.0",
   "author": {
     "name": "Igness, Inc.",
     "url": "https://www.igness.ai"

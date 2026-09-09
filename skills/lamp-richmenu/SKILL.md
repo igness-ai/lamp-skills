@@ -80,6 +80,8 @@ sf api request rest "/services/data/v67.0/sobjects/igns__RichMenu__c" --method P
 | `callagent` | AI エージェント呼出 | `igns__ActionReply{n}__c`（`igns__Reply__c` の Id） | `igns__ActionMessage{n}__c`、`igns__ActionOption{n}__c`、`igns__ActionFillInText{n}__c` |
 | `richmenuswitch` | 別のリッチメニューへ切替（タブ） | `igns__ActionRichMenu{n}__c`（切替先の `igns__RichMenu__c` の Id。**切替先も発行済み**であること） | |
 
+Agentforce の自動応答を呼び出す場合は、`lamp-agentforce` で種別 `Agentforce` の自動応答を作成し、その Id を `ActionReply{n}` に設定する。
+
 ## ④ 検証ループ
 
 ```bash
