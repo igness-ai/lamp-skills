@@ -113,7 +113,7 @@ sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampPublishR
 | …HTTP 400: 画像の寸法（W×Hpx）が対応していません… | ② の制約に合わせて作り直して上げ直す |
 | …HTTP 400: 画像の容量が1MBを超えています… | 圧縮して上げ直す |
 | …HTTP 400: LINEがリッチメニューの設定を受け付けませんでした。… `areas[0].action.data: …` | 示された項目（例: postback の data が長すぎる＝`ActionMessage` を短く）を直す |
-| …HTTP 401 / 403 | サーバー認証か公式アカウント接続の問題（`lamp-setup` で確認）。接続直後は最大 5 分待つ |
+| …HTTP 401 / 403 | サーバー認証（`lamp-setup`）か公式アカウント接続（`lamp-social-account-setup`）の問題。接続直後は最大 10 分待つ |
 
 発行に失敗しても LINE 側に未完成のメニューは残らない（backend が回収する）ので、直してそのまま再発行してよい。
 
@@ -151,4 +151,4 @@ LINE 側から削除され、レコードは未発行（`igns__IsActive__c=false
 | 発行は成功したのにスマホで画像が崩れる | 画像の寸法がプリセットの `Width__c × Height__c` と違う。作り直して `update` |
 | `RichMenuStatus__c` が `updating` のまま長い | 非同期処理の失敗。`RichMenuErrorMessage__c` を確認し、値を一度 `null` にしてから再設定 |
 | `richmenuswitch` で切り替わらない | 切替先が未発行。切替先を先に ⑤ で発行してから、このメニューを `update` |
-| 発行で `HTTP 403` | 公式アカウント接続の直後（最大 5 分）か、サーバー認証切れ |
+| 発行で `HTTP 403` | 公式アカウント接続の直後（最大 10 分）か、サーバー認証切れ |

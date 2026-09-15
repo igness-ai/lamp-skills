@@ -12,7 +12,7 @@ description: Igness LAMP のBot自動応答を作成し、キーワード・友�
 ## 1. 対象・既存設定を確認する
 
 - LAMP基本パッケージ1.157以降を対象とする。対象org（以下 `<org>`）、公式アカウント、返す内容、開始条件、優先順を依頼内容から特定する。不明なものだけ確認する。
-- `lamp-setup` によるサーバー認証・公式アカウント接続・受信処理の実行ユーザーへの権限付与が必要。LINE Official Account Managerの応答メッセージとの重複にも注意する。
+- `lamp-setup` によるサーバー認証・受信処理の実行ユーザーへの権限付与と、`lamp-social-account-setup` による公式アカウント接続が必要。LINE Official Account Managerの応答メッセージとの重複にも注意する。
 - Salesforceの自動応答タブで設定するか、以下のRESTで保存する。組織・項目・有効な選択肢・権限は対象orgのdescribeで確認する。
 
 ```bash

@@ -37,4 +37,4 @@ sf data query -q "SELECT Id, igns__SocialAccount__c, igns__Lead__c, igns__Contac
 - **配信レポート**: Lead / Contactを基準にする場合は、確認できた友だちLookup、または関連する友だちのIdを先頭の詳細列にする。Lead / Contact自身のIdや友だちの表示名は宛先にならない。レポートタイプの列キーは別途describeで解決する。
 - **条件分岐・差し込み**: Bot条件とテンプレート差し込みは友だち自身の項目を使う。Lead / Contactの項目パスがどこでも利用できるとは仮定しない。
 
-参照項目がない場合、配信は友だち基準のレポートからLead / Contactの関連を使えるかを先に検討する。項目作成が必要で、依頼に連携設定が含まれる場合は `lamp-setup` の `LampSetupRelationshipFieldsAction` を使い、返った実際のAPI名・結果とdescribeを再確認する。レポート作成だけの依頼を理由に新規項目を無断追加しない。既存データへの参照値の補完は項目作成とは別の作業である。
+参照項目がない場合、配信は友だち基準のレポートからLead / Contactの関連を使えるかを先に検討する。項目作成が必要で、依頼に連携設定が含まれる場合は `lamp-social-account-setup` Step 4 の `LampSetupRelationshipFieldsAction` を使い、返った実際のAPI名・結果とdescribeを再確認する。レポート作成だけの依頼を理由に新規項目を無断追加しない。既存データへの参照値の補完は項目作成とは別の作業である。

@@ -98,7 +98,7 @@ sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampIssueCou
 | このクーポンは既に LINE に発行されています… | 変更したいなら ⑤ |
 | クーポンの作成に失敗しました: HTTP 400: imageUrl is invalid… | 画像 URL が http や外部の URL。② でコンテンツ配信基盤に上げ直す |
 | クーポンの作成に失敗しました: HTTP 400: … | LINE の検証で拒否。`message` の項目を直す |
-| HTTP 401 / 403 | サーバー認証か公式アカウント接続の問題（`lamp-setup`）。接続直後は最大 5 分待つ |
+| HTTP 401 / 403 | サーバー認証（`lamp-setup`）か公式アカウント接続（`lamp-social-account-setup`）の問題。接続直後は最大 10 分待つ |
 
 発行後は `Name`・期間・リワード・画像・コード等を変更できない（入力規則「一度有効化したクーポンは編集できません」）。
 

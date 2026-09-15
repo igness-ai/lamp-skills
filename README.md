@@ -5,7 +5,8 @@
 
 | スキル | できること | 必要なパッケージ |
 | --- | --- | --- |
-| [`lamp-setup`](skills/lamp-setup/SKILL.md) | パッケージインストール後の初期設定（権限割当・サーバー認証・パス有効化）と LINE 公式アカウント接続を自動で進める | Igness LAMP **1.153 以降** |
+| [`lamp-setup`](skills/lamp-setup/SKILL.md) | パッケージインストール後の初期設定（権限セットグループ作成・権限割当・サーバー認証・パス有効化）を自動で進め、LAMP では続けて最初の公式アカウント接続（`lamp-social-account-setup`）まで通す | Igness LAMP **1.153 以降** |
+| [`lamp-social-account-setup`](skills/lamp-social-account-setup/SKILL.md) | LINE 公式アカウントを接続する（初回・2 つ目以降の追加）。チャネル接続・LIFF 自動作成・公式アカウントレコード作成・連携項目・疎通確認まで進め、接続済みアカウントの確認・解除の案内と、チャネル情報の再認証（1.158 以降）も行う | Igness LAMP **1.153 以降**（再認証は **1.158 以降**） |
 | [`lamp-media-upload`](skills/lamp-media-upload/SKILL.md) | 画像・動画をコンテンツ配信基盤へアップロードし、テンプレートメッセージ・クーポン・リッチメニュー・送信元アイコンに設定する | Igness LAMP **1.155 以降** |
 | [`lamp-template`](skills/lamp-template/SKILL.md) | テンプレートと9種類のテンプレートメッセージ（テキスト／画像／動画／リンク付き画像／カード／設問（2択）／カード（画像のみ）／クーポン／フレックス）を作成し、有効化エラーを読んで修正、返信ボタン・項目の代入・テスト配信まで行う | Igness LAMP **1.156 以降** |
 | [`lamp-broadcast`](skills/lamp-broadcast/SKILL.md) | 一斉配信を作成・スケジュール・キャンセルし、配信の状態確認、配信結果（成功／失敗、個人別 CSV）、既読数・クリック数の取得まで行う。対象は CSV と Salesforce レポートの両方に対応し、レポート＋繰り返しでセグメント定期配信・友だち追加 N 日後のステップ配信を組む | Igness LAMP **1.157 以降** |
@@ -39,12 +40,12 @@
 /plugin install lamp@lamp-skills
 ```
 
-以後は「LAMP をセットアップして」「LAMP に画像をアップロードして」「LAMP でカードメッセージのテンプレートを作って」「毎朝 9 時に配信して」「リッチメニューを発行して」「クーポンを作って」「LINE の自動応答を Agentforce にして」「Botで問い合わせ内容を選んでAgentforceにつなぐ受付を一式作って」「チャットの返信ドラフトと送信元を設定して」のように依頼するだけで、対応するスキルが使われます。
+以後は「LAMP をセットアップして」「2 つ目の公式アカウントを追加して」「LAMP に画像をアップロードして」「LAMP でカードメッセージのテンプレートを作って」「毎朝 9 時に配信して」「リッチメニューを発行して」「クーポンを作って」「LINE の自動応答を Agentforce にして」「Botで問い合わせ内容を選んでAgentforceにつなぐ受付を一式作って」「チャットの返信ドラフトと送信元を設定して」のように依頼するだけで、対応するスキルが使われます。
 更新は `/plugin update lamp@lamp-skills` で取り込めます。
 
 ### 手動コピー（Codex / その他のエージェント）
 
-`skills/` 以下のスキルフォルダを、`references/`・`scripts/` を含めて同じ階層へコピーします。組み合わせて使うスキルも導入してください。
+`skills/` 以下のスキルフォルダを、`references/`・`scripts/` を含めて同じ階層へコピーします。組み合わせて使うスキルも導入してください（`lamp-setup` は `lamp-social-account-setup` を、他の多くのスキルは `lamp-setup/references/` を参照します）。
 
 | エージェント | コピー先 |
 | --- | --- |
@@ -77,6 +78,7 @@ cp -R lamp-skills/skills/* .claude/skills/
 
 | lamp-skills | LAMP パッケージ |
 | --- | --- |
+| 1.6.x | 1.5.x から公式アカウント接続を `lamp-social-account-setup` に分離（初回・追加の両対応）。`lamp-setup` は Salesforce 側の設定と初回接続の呼び出しに専念。チャネル情報の再認証（`igns__LampReauthChannelAction`）は 1.158 以降 |
 | 1.5.x | 1.4.x に `lamp-bot`、受付からAgentforceへの接続手順、レポートの宛先検証、参照項目の確認、テンプレートの詳細制約を追加 |
 | 1.4.x | 1.3.x に `lamp-agentforce` / `lamp-chat` を追加（基本パッケージ 1.157 以降を対象。自動応答にはAgentforceエージェント、返信ドラフトにはプロンプトテンプレートが必要） |
 | 1.3.x | 1.2.x と同じ。REST 呼び出しを API v67.0 に統一、`lamp-broadcast` にレポート配信・繰り返し・ステップ配信を追加 |

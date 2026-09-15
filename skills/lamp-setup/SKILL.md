@@ -1,12 +1,14 @@
 ---
 name: lamp-setup
-description: LAMP/BRAINの初期設定を自動実行する。パッケージインストール後の設定アシスタント（権限割当・サーバー認証・パス有効化）とLINE公式アカウント接続を、Salesforce CLIとLAMPの設定アクションで進める。「LAMPをセットアップして」「LAMPの初期設定」「公式アカウントを接続して」などで使用。
+description: LAMP/BRAINの初期設定を自動実行する。パッケージインストール後の設定アシスタント（権限セットグループ作成・権限割当・サーバー認証・パス有効化）をSalesforce CLIとLAMPの設定アクションで進め、LAMPでは続けて最初のLINE公式アカウント接続（lamp-social-account-setup）まで通す。「LAMPをセットアップして」「LAMPの初期設定」「BRAINの初期設定」などで使用。公式アカウントの追加だけなら lamp-social-account-setup を使う。
 ---
 
 # LAMP 初期セットアップ
 
 LAMP/BRAINパッケージ（バージョン1.153以降）をインストールしたSalesforce組織の初期設定を自動で進める。
 ユーザーにしかできない操作（ブラウザでの認証承認、LINE Developersコンソールの設定、スマホでのQR読み取り）だけを明確に依頼し、それ以外はすべてこのスキルが実行する。
+
+流れは設定アシスタントと同じ: Step 1〜4 がSalesforce側の設定（BRAINだけを使う組織はここまで）、Step 5 が最初のLINE公式アカウント接続。**運用中の組織に公式アカウントを追加するだけなら、このスキルではなく `lamp-social-account-setup` を使う**（Step 1〜4 は不要）。
 
 ## 前提条件
 
@@ -31,7 +33,7 @@ sf data query -q "SELECT DeveloperName, Status FROM PermissionSetGroup WHERE Dev
 sf data query -q "SELECT CronJobDetail.Name FROM CronTrigger WHERE CronJobDetail.Name LIKE 'LAMP - %'" -o <org>
 ```
 
-- 権限セットグループ6件（LAMP_SystemAdministrator_Group / LAMP_User_Group / LAMP_MarketingAdministrator_Group / LAMP_MarketingUser_Group / BRAIN_Administrator_Group / BRAIN_User_Group）とスケジュールジョブ2件（ReplyHistoryScheduler / AggregationUpdateBatch）が揃っていれば完了
+- 権限セットグループ6件（LAMP_SystemAdministrator_Group / LAMP_User_Group / LAMP_MarketingAdministrator_Group / LAMP_MarketingUser_Group / BRAIN_Administrator_Group / BRAIN_User_Group）とスケジュールジョブ3件（`LAMP - ReplyHistoryScheduler Daily Job` / `LAMP - AggregationUpdateBatch Daily Job` / `LAMP - Broadcast End Sweeper Hourly Job`）が揃っていれば完了。1.153〜1.156 では毎時ジョブが無く2件で正常
 - `Status` が `Updated` でないグループは再計算中。数分待って再確認する
 - 1.153〜1.156 でインストールした組織では一部がインストール時に自動作成されているが、同じアクションを実行して問題ない（不足分だけ作られる）
 
@@ -86,69 +88,16 @@ sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampPathAssi
 
 `status: enabled` になれば完了。
 
-## Step 5: LINE公式アカウントの接続
+## Step 5: 最初のLINE公式アカウントの接続（LAMPのみ）
 
-### 5-1. チャネル接続の開始
+BRAINだけを利用する組織はここで**セットアップ完了**。LAMPを使う組織は、続けて公式アカウントを接続する。
 
-ユーザーに **LINE DevelopersのMessaging APIチャネルのチャネルIDとチャネルシークレット** を確認する（LINE Developers → 対象チャネル → チャネル基本設定）。アカウント名は接続時にLINE側から自動取得されるため**ユーザーには聞かない**。
+手順は `lamp-social-account-setup` スキル（[SKILL.md](../lamp-social-account-setup/SKILL.md)）の Step 0〜5 をそのまま実行する。初回接続でも追加接続でも同じ手順で、Messaging APIチャネルの接続 → LINEログインチャネルからのLIFF自動作成と公式アカウントレコード作成 → LINEコンソールでの仕上げ（ユーザー操作）→ 連携項目（任意）→ 疎通確認、の順に進む。Step 0 の認証状態確認は、Step 3〜4 を終えた直後なら結果だけ確認して進んでよい。
 
-```bash
-sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampStartChannelConnectionAction" --method POST \
-  -b '{"inputs":[{"channelId":"<チャネルID>","channelSecret":"<チャネルシークレット>"}]}' -o <org>
-```
-
-- 成功時: `lampId` と `botDisplayName`（公式アカウントの表示名）を控える。トークン発行・Webhook自動登録まで完了している
-- `errorCode: CHANNEL_IN_USE`: このチャネルは別の組織に接続済み。**この組織に切り替えてよいかユーザーに確認し**、承諾されたら入力に `"confirmTakeover":true` を追加して再実行（旧組織の接続は切れる）
-- `errorCode: CHANNEL_ALREADY_CONNECTED`: この組織で接続済み。`existingRecordId` のレコードを案内して終了
-
-### 5-2. LINEログインチャネルとLIFFの設定
-
-ユーザーに **LINEログインチャネルのチャネルIDとチャネルシークレット** を確認する（未作成の場合はLINE Developersで「LINEログイン」チャネルを新規作成してもらう）。
-
-```bash
-sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampCompleteChannelConnectionAction" --method POST \
-  -b '{"inputs":[{"lampId":"<5-1で取得したlampId>","name":"<5-1のbotDisplayName>","loginChannelId":"<ログインチャネルID>","loginChannelSecret":"<ログインチャネルシークレット>"}]}' -o <org>
-```
-
-成功すると LIFFアプリの自動作成と `公式アカウント（SocialAccount）` レコードの作成まで完了する。`recordId` を控える。
-
-### 5-3. LINEコンソールでの仕上げ（ユーザー操作が必要）
-
-以下の2つはLINE側にAPIがないため、ユーザーに依頼する（完了の報告を待ってから次へ進む）:
-
-1. **LINEログインチャネルの公開設定**: LINE Developers → ログインチャネル → チャネル基本設定で「リンクされたLINE公式アカウント」に対象の公式アカウントを設定し、チャネルを「開発中」から「公開」に変更
-2. **応答設定**: [LINE Official Account Manager](https://manager.line.biz) → 設定 → 応答設定で「応答メッセージ」をオフ（あいさつメッセージもLAMPで送る場合はオフ）
-
-### 5-4. リード・取引先責任者との連携（任意）
-
-リード/取引先責任者と友だちを紐付ける場合のみ。先に [既存の友だち参照項目を確認](references/social-friend-fields.md) する。通常の作成名は `SocialFriend_<LampId>__c` だが、未作成・別名・オブジェクトの利用不可もある。既存の設定が使えるなら再利用し、新規連携項目の作成が必要な場合に実行する:
-
-```bash
-sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampSetupRelationshipFieldsAction" --method POST \
-  -b '{"inputs":[{"socialAccountId":"<5-2で取得したrecordId>"}]}' -o <org>
-```
-
-返った `success`、`leadFieldApiName`、`contactFieldApiName` と、公式アカウントの `LeadField__c` / `ContactField__c` を照合し、describeで実在・参照先を確認する。片方が未作成なら両方成功と報告しない。項目作成と既存レコードへの値の同期は別に確認する。
-
-### 5-5. 疎通確認
-
-```bash
-# 疎通確認用の流入経路を作成（既にあれば再利用）
-sf data query -q "SELECT Id, igns__URL__c FROM igns__Source__c WHERE Name = '疎通確認' AND igns__SocialAccount__c = '<recordId>'" -o <org>
-sf data create record -s igns__Source__c -v "Name='疎通確認' igns__SocialAccount__c=<recordId>" -o <org>
-```
-
-作成後に `igns__URL__c` を取得し、`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=<URLエンコードしたigns__URL__c>` をQRコードとしてユーザーに提示。**スマホのLINEで読み取って友だち追加してもらう**。その後:
-
-```bash
-sf data query -q "SELECT Id, Name, LastModifiedDate FROM igns__SocialFriend__c ORDER BY LastModifiedDate DESC LIMIT 3" -o <org>
-```
-
-友だちレコードが作成されていれば、SalesforceとLINEの連携は正常に動作している。**セットアップ完了**。
+公式アカウントレコードが作成されると、設定アシスタントの「公式アカウントの設定」は次に設定タブを開いたときに自動で完了扱いになる。疎通確認まで終わったら**セットアップ完了**。
 
 ## トラブルシューティング
 
 - アクション呼び出しが404（`The requested resource does not exist`）→ パッケージが1.153未満。アップグレードが必要
 - Step 3の認証URLが `no_contract` エラーページに飛ぶ → 契約IDまたはアクセスキーが誤り。ユーザーに再確認
-- Step 5-1で `400` / `invalid client_id` 相当のメッセージ → チャネルID/シークレットの入力ミス
-- 疎通確認で友だちレコードが増えない → 5-3の応答設定・Webhook設定を再確認。公式アカウント（SocialAccount）レコードのページにWebhook URLが表示されるので、LINE DevelopersのMessaging API設定のWebhook URLと一致しているか確認する
+- 公式アカウント接続（Step 5）の問題 → `lamp-social-account-setup` のトラブルシューティングを参照
