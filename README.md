@@ -1,7 +1,7 @@
 # lamp-skills
 
 [Igness LAMP / BRAIN](https://www.igness.ai) を AI コーディングエージェントから操作するためのスキル集です。
-Claude Code・Codex・Blaze をはじめ、Salesforce CLI（`sf`）を実行できるエージェントであれば同じ手順書で動作します。
+[Blaze](https://blaze.igness.ai/)・Claude Code・Codex をはじめ、Salesforce CLI（`sf`）を実行できるエージェントであれば同じ手順書で動作します。
 
 | スキル | できること | 必要なパッケージ |
 | --- | --- | --- |
@@ -17,7 +17,22 @@ Claude Code・Codex・Blaze をはじめ、Salesforce CLI（`sf`）を実行で�
 
 ## インストール
 
-### Claude Code（推奨）
+### Blaze（推奨）
+
+[Blaze](https://blaze.igness.ai/) では、このリポジトリの URL を入れるだけで全スキルをまとめて追加できます（Blaze 0.17.1 以降）。
+
+- 設定 → Skills → 「追加」で `https://github.com/igness-ai/lamp-skills` を入力する
+- または、チャットに次を送る
+
+```
+/skill-install https://github.com/igness-ai/lamp-skills
+```
+
+`skills/` 配下の全スキルが `references/`・`scripts/` ごと導入され、以後はチャットで `/lamp-setup` のように呼び出すか、「LAMP でカードメッセージのテンプレートを作って」のように依頼するだけで対応するスキルが使われます。
+更新するときは同じ URL でもう一度追加し、「置き換え」を選びます。組織の他のメンバーへ配るには、導入したスキルを「ライブラリに共有」してください。
+詳しくは [Blaze ヘルプ「スキル（Skills）」](https://help.igness.ai/blaze/settings/skills) を参照してください。
+
+### Claude Code
 
 ```
 /plugin marketplace add igness-ai/lamp-skills
@@ -26,10 +41,6 @@ Claude Code・Codex・Blaze をはじめ、Salesforce CLI（`sf`）を実行で�
 
 以後は「LAMP をセットアップして」「LAMP に画像をアップロードして」「LAMP でカードメッセージのテンプレートを作って」「毎朝 9 時に配信して」「リッチメニューを発行して」「クーポンを作って」「LINE の自動応答を Agentforce にして」「Botで問い合わせ内容を選んでAgentforceにつなぐ受付を一式作って」「チャットの返信ドラフトと送信元を設定して」のように依頼するだけで、対応するスキルが使われます。
 更新は `/plugin update lamp@lamp-skills` で取り込めます。
-
-### Blaze
-
-[Blaze](https://blaze.igness.ai/) は Skills に対応しています。設定 → Skills の「Skill を追加」で、`skills/<name>` フォルダを ZIP にして「アップロード」します。参照資料やスクリプトを使うスキルは `SKILL.md` だけの貼り付けでは不足するため、`references/`・`scripts/` も含めてください。複数スキルを組み合わせる受付構築では、参照先のスキルも同じ階層へ導入します。チャットでは `/<name>`（例: `/lamp-setup`）で呼び出せます。詳しくは [Blaze ヘルプ「スキル（Skills）」](https://blaze.igness.ai/help/settings/skills) を参照してください。
 
 ### 手動コピー（Codex / その他のエージェント）
 
