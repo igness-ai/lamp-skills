@@ -60,8 +60,9 @@ rm -f /tmp/lamp-channel.json
 
 | 結果 | 対応 |
 |---|---|
-| `success: true` | `lampId` と `botDisplayName`（公式アカウントの表示名）、`liffEndpointUrl` を控える。トークン発行・LampID採番・Webhook URLの自動登録まで完了している |
-| `webhookSet: false` または `webhookVerified: false` | Webhookの自動登録に失敗。Step 3 で `webhookUrl` の手動登録を依頼する（接続自体は続行できる） |
+| `success: true` | `lampId` と `botDisplayName`（公式アカウントの表示名）、`liffEndpointUrl` を控える。トークン発行・LampID採番は完了。Webhook URLの登録・検証結果は以下のフラグで確認する |
+| `webhookSet: false` | Webhook URLの自動登録に失敗。Step 3 で `webhookUrl` の手動登録を依頼する（接続自体は続行できる） |
+| `webhookSet: true` かつ `webhookVerified: false` | URLは登録済みだが検証に失敗。Step 3 で登録先URLを照合し、LINE Developersの「検証」で確認する。URL未登録とは扱わない |
 | `errorCode: CHANNEL_ALREADY_CONNECTED` | この組織で接続済み。`existingRecordId` のレコードを案内して終了 |
 | `errorCode: CHANNEL_IN_USE` | このチャネルは別の組織に接続済み。**この組織に切り替えてよいかユーザーに確認し**、承諾されたら入力に `"confirmTakeover":true` を追加して再実行する。旧組織の接続は切れ、旧組織のレコードは動作しなくなる（自動削除はされない） |
 | `LINEアカウントの作成上限に達しました（n/m）` | 契約の公式アカウント数の上限。追加するには契約の見直し（Igness へ連絡）が必要。既存アカウントの解除で枠を空ける場合は「既存アカウントの確認・変更」を参照 |
@@ -92,17 +93,23 @@ rm -f /tmp/lamp-login.json
 
 ## Step 3: LINEコンソールでの仕上げ（ユーザー操作が必要）
 
-以下はLINE側にAPIがないため、ユーザーに依頼する。**完了の報告を待ってから次へ進む**。
+以下はLINE側の画面で確認・設定する必要があるため、ユーザーに依頼する。**完了の報告を待ってから次へ進む**。すでに設定済みの項目は、現在の状態を確認すればよい。
 
-1. **LINEログインチャネルの公開設定**（LINE Developers → Step 2 のログインチャネル → チャネル基本設定）
+1. **Webhookの利用と再送**（LINE Developers → Step 1 の **Messaging APIチャネル** →「Messaging API設定」→「Webhook設定」）
+   - Step 1 で `webhookSet: false` だった場合は、先に「Webhook URL」に Step 1 の `webhookUrl` を登録して「検証」が成功することを確認してもらう。`webhookVerified: false` の場合も、登録先URLの照合と検証を依頼する
+   - **「Webhookの利用」をON**にする。OFFのままだと、URLが正しく登録されていてもLAMPにメッセージが届かない
+   - **「Webhookの再送」もON**にする。確認画面が表示されたら内容を確認して有効にする。一時的な通信エラーなどで受信に失敗した場合にLINEが再送する設定で、OFFでも通常の初回配信は行われる
+   - 両方のスイッチがON（緑色）であることを確認してもらう。すでにONなら切り替えない
+   - `success`・`webhookSet`・`webhookVerified` がすべて `true` でも、この2つがONである証拠にはならない。URL登録・検証の成否と、利用・再送の状態を分けて確認する
+   - スクリーンショット付きの手順: [Step.2-4 LINEコンソールでの仕上げ](https://help.igness.ai/lamp/getting-started/step-2-4-finish-line-console)
+2. **LINEログインチャネルの公開設定**（LINE Developers → Step 2 のログインチャネル → チャネル基本設定）
    - 「友だち追加オプション」の「リンクされたLINE公式アカウント」で、接続した公式アカウントを選択して「更新」（忘れると友だち登録URLから友だち追加されない）
    - チャネル上部の「開発中」を「公開」に変更（元に戻せない旨を添える）
-2. **Webhookの利用**（LINE Developers → Messaging APIチャネル → Messaging API設定）
-   - 「Webhookの利用」をON、「Webhookの再送」もON（LAMPからは切り替えられない。OFFのままだとメッセージが届かない）
-   - Step 1 で `webhookSet: false` だった場合は、同じ画面の「Webhook URL」に Step 1 の `webhookUrl` を登録して「検証」が成功することも確認してもらう
 3. **応答設定**（[LINE Official Account Manager](https://manager.line.biz) → 対象アカウント → 設定 → 応答設定）
    - 「応答メッセージ」をOFF（LAMPの自動応答と二重になるため）
    - 「あいさつメッセージ」も、LAMPで送る場合はOFF
+
+**APIでできる範囲:** 公開Messaging APIの[Webhook URL設定](https://developers.line.biz/ja/reference/messaging-api/nojs/#set-webhook-endpoint-url)で変更できるのはURLのみ。[Webhook設定の取得](https://developers.line.biz/ja/reference/messaging-api/nojs/#get-webhook-endpoint-information)の `active` で「Webhookの利用」の状態は取得できるが、利用・再送をON/OFFにする公開APIは提供されていない。再送の状態はこの取得APIでは分からない。[LINE公式の再送設定手順](https://developers.line.biz/ja/docs/messaging-api/receiving-messages/#enable-webhook-redelivery)に従って画面で確認する。
 
 ## Step 4: リード・取引先責任者との連携（任意）
 

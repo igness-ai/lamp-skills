@@ -1,7 +1,7 @@
 {
   "name": "lamp",
   "description": "Igness LAMP / BRAIN の初期セットアップ・公式アカウント接続・メディア・テンプレート・配信・リッチメニュー・クーポン・Bot・Agentforce自動応答・チャット設定を Salesforce CLI と設定画面で扱うスキル",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "author": {
     "name": "Igness, Inc.",
     "url": "https://www.igness.ai"

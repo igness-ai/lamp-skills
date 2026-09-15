@@ -23,7 +23,7 @@
         "./skills/lamp-bot",
         "./skills/lamp-chat"
       ],
-      "version": "1.6.0",
+      "version": "1.6.1",
       "category": "productivity",
       "tags": [
         "salesforce",
