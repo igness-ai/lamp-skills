@@ -36,7 +36,7 @@ sf package installed list -o <org> --json | jq -r '.result[] | select(.Subscribe
 sf api request rest "/services/data/v67.0/ssot/data-streams" -o <org> | jq -r '.dataStreams[] | "\(.name)\t\(.dataStreamStatus)"'
 ```
 
-`Igness_LAMP_TimelineEvent_…`・`igns_SocialFriend_c_Home`・`igns_Reply_c_Home`・`igns_Broadcast_c_Home` の4本が `ACTIVE` なら展開済み。手順3へ進む。一部だけある場合は、重ねて展開せず、まず状況を利用者に伝える。
+`Igness_LAMP_Timeline_…`・`igns_SocialFriend_c_Home`・`igns_Reply_c_Home`・`igns_Broadcast_c_Home` の4本が `ACTIVE` なら展開済み。手順3へ進む。一部だけある場合は、重ねて展開せず、まず状況を利用者に伝える。
 
 ## 2. Data Kit を展開する
 
@@ -46,11 +46,11 @@ sf api request rest "/services/data/v67.0/ssot/data-streams" -o <org> | jq -r '.
 ORG_ID=$(sf org display -o <org> --json | jq -r '.result.id' | cut -c1-15)
 cat > /tmp/lamp-data360-deploy.json <<EOF
 {"components":[
- {"type":"DataStreamBundle","config":{"connectorType":"CRM","bundleName":"igns__Igness_LAMP_Friend","bundleConfig":{"orgId":"${ORG_ID}"}}},
- {"type":"DataStreamBundle","config":{"connectorType":"INGESTAPI","bundleName":"igns__Igness_LAMP_Conversation","bundleConfig":{"connectorName":"Igness_LAMP"}}}
+ {"type":"DataStreamBundle","config":{"connectorType":"CRM","bundleName":"igns__LAMP_Friend","bundleConfig":{"orgId":"${ORG_ID}"}}},
+ {"type":"DataStreamBundle","config":{"connectorType":"INGESTAPI","bundleName":"igns__LAMP_Timeline","bundleConfig":{"connectorName":"Igness_LAMP"}}}
 ]}
 EOF
-sf api request rest "/services/data/v67.0/ssot/data-kits/igns__Igness_LAMP_Data_Kit?asyncMode=true&dataspace=default" \
+sf api request rest "/services/data/v67.0/ssot/data-kits/igns__LAMP_Data_Kit?asyncMode=true&dataspace=default" \
   --method POST --body @/tmp/lamp-data360-deploy.json -o <org>
 ```
 
@@ -64,8 +64,8 @@ sf data query -q "SELECT FIELDS(ALL) FROM DataKitDeploymentLog WHERE JobIdentifi
 
 画面で行う場合は、［設定］のデータキットの画面ではなく、**Data Cloud アプリの［データストリーム］→［新規］から、2回に分けて**作る（［設定］のデータキット詳細には展開のボタンが無い）。
 
-1. 友だち・自動応答・配信:「Salesforce CRM」→［次へ］→ 一覧の一番下「カスタムバンドル」の `Igness_LAMP_Friend` →［次へ］→［次へ］→［リリース］（入力なし）
-2. 会話:「インストール済みデータキットおよびパッケージ」→［次へ］→「Igness LAMP Data Kit」→ `Igness_LAMP_Conversation` にチェック →［次へ］→［新規コネクタ］→ **コネクタ名に `Igness_LAMP` と入力**（既定値は無い。ここを誤ると会話が届かない）→［保存］→［次へ］→［次へ］→［リリース］
+1. 友だち・自動応答・配信:「Salesforce CRM」→［次へ］→ 一覧の一番下「カスタムバンドル」の `LAMP_Friend` →［次へ］→［次へ］→［リリース］（入力なし）
+2. 会話:「インストール済みデータキットおよびパッケージ」→［次へ］→「Igness LAMP Data Kit」→ `LAMP_Timeline` にチェック →［次へ］→［新規コネクタ］→ **コネクタ名に `Igness_LAMP` と入力**（既定値は無い。ここを誤ると会話が届かない）→［保存］→［次へ］→［次へ］→［リリース］
 
 画面つきの手順はヘルプの「Data 360連携を設定したい」を案内する。
 
@@ -91,7 +91,7 @@ sf api request rest "/services/data/v67.0/ssot/data-streams" -o <org> | jq -r '.
 
 ```bash
 cat > /tmp/lamp-data360-count.json <<'EOF'
-{"sql":"SELECT igns__direction__c, COUNT(*) FROM igns__Igness_LAMP_Conversation_Event__dlm GROUP BY igns__direction__c"}
+{"sql":"SELECT igns__direction__c, COUNT(*) FROM igns__LAMP_Timeline__dlm GROUP BY igns__direction__c"}
 EOF
 sf api request rest "/services/data/v67.0/ssot/queryv2" --method POST --body @/tmp/lamp-data360-count.json -o <org>
 ```
@@ -102,7 +102,7 @@ sf api request rest "/services/data/v67.0/ssot/queryv2" --method POST --body @/t
 
 | データモデル | 内容 |
 |---|---|
-| Igness LAMP Conversation Event | 会話1件ごと。向き、種類、本文、日時、メッセージの構造（Flex など）、メディアURL、配信ID、AI自動返信かどうか、送信取消の印、送信元の種別とID |
+| Igness LAMP Timeline | 会話1件ごと。向き、種類、本文、日時、メッセージの構造（Flex など）、メディアURL、配信ID、AI自動返信かどうか、送信取消の印、送信元の種別とID |
 | Igness LAMP Friend | 友だち。取引先責任者・リードへの参照を含む |
 | Igness LAMP Reply / Igness LAMP Broadcast | 自動応答・配信 |
 
@@ -124,7 +124,7 @@ sf api request rest "/services/data/v67.0/ssot/queryv2" --method POST --body @/t
 確認:
 
 ```bash
-sf api request rest "/services/data/v67.0/ssot/metadata?entityType=DataModelObject&entityName=igns__Igness_LAMP_Conversation_Event__dlm" -o <org> \
+sf api request rest "/services/data/v67.0/ssot/metadata?entityType=DataModelObject&entityName=igns__LAMP_Timeline__dlm" -o <org> \
   | jq -r '.metadata[0].relationships[] | "\(.fromEntityAttribute) -> \(.toEntity)"'
 ```
 
