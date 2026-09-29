@@ -10,7 +10,7 @@
 | [`lamp-media-upload`](skills/lamp-media-upload/SKILL.md) | 画像・動画をコンテンツ配信基盤へアップロードし、テンプレートメッセージ・クーポン・リッチメニュー・送信元アイコンに設定する | Igness LAMP **1.155 以降** |
 | [`lamp-template`](skills/lamp-template/SKILL.md) | テンプレートと9種類のテンプレートメッセージ（テキスト／画像／動画／リンク付き画像／カード／設問（2択）／カード（画像のみ）／クーポン／フレックス）を作成し、有効化エラーを読んで修正、返信ボタン・項目の代入・テスト配信まで行う | Igness LAMP **1.156 以降** |
 | [`lamp-broadcast`](skills/lamp-broadcast/SKILL.md) | 一斉配信を作成・スケジュール・キャンセルし、配信の状態確認、配信結果（成功／失敗、個人別 CSV）、既読数・クリック数の取得まで行う。対象は CSV と Salesforce レポートの両方に対応し、レポート＋繰り返しでセグメント定期配信・友だち追加 N 日後のステップ配信を組む | Igness LAMP **1.157 以降** |
-| [`lamp-richmenu`](skills/lamp-richmenu/SKILL.md) | リッチメニューを作成・検証・LINE に発行し、デフォルト設定・友だち個別の割当・差し替え・削除まで行う | Igness LAMP **1.157 以降** |
+| [`lamp-richmenu`](skills/lamp-richmenu/SKILL.md) | リッチメニューを作成・検証・LINE に発行し、デフォルト設定・友だち個別の割当・差し替え・削除まで行う。タブ付きメニュー・自由配置・分析（LINE 統計）にも対応 | Igness LAMP **1.157 以降**（タブ付き・自由配置・分析は 1.161 以降） |
 | [`lamp-coupon`](skills/lamp-coupon/SKILL.md) | LINE クーポンを作成・検証・発行し、テンプレートへの組み込み、内容変更（複製→再発行）、終了まで行う | Igness LAMP **1.157 以降** |
 | [`lamp-agentforce`](skills/lamp-agentforce/SKILL.md) | 自動応答の種別を Agentforce に設定し、開始条件・ボタン起動・会話継続の確認・停止まで行う | Igness LAMP **1.157 以降**＋利用可能な Agentforce エージェント |
 | [`lamp-bot`](skills/lamp-bot/SKILL.md) | Bot自動応答の条件と固定テンプレートを設定し、受付カード・リッチメニューからAgentforceへつなぐ構成をまとめて作る | Igness LAMP **1.157 以降**。AIへの接続には利用可能なAgentforceエージェントも必要 |
@@ -78,6 +78,7 @@ cp -R lamp-skills/skills/* .claude/skills/
 
 | lamp-skills | LAMP パッケージ |
 | --- | --- |
+| 1.7.x | 1.6.x の `lamp-richmenu` にタブ付きメニュー（別メニューを切り替えでつなぐ）・自由配置・12 領域・分析（`igns__LampGetRichMenuInsightsAction`）を追加（1.161 以降）。`lamp-setup` のスケジュールジョブを 4 件にし、パッケージのアップグレード後の再実行を追記 |
 | 1.6.x | 1.5.x から公式アカウント接続を `lamp-social-account-setup` に分離（初回・追加の両対応）。`lamp-setup` は Salesforce 側の設定と初回接続の呼び出しに専念。チャネル情報の再認証（`igns__LampReauthChannelAction`）は 1.158 以降 |
 | 1.5.x | 1.4.x に `lamp-bot`、受付からAgentforceへの接続手順、レポートの宛先検証、参照項目の確認、テンプレートの詳細制約を追加 |
 | 1.4.x | 1.3.x に `lamp-agentforce` / `lamp-chat` を追加（基本パッケージ 1.157 以降を対象。自動応答にはAgentforceエージェント、返信ドラフトにはプロンプトテンプレートが必要） |

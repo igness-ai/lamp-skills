@@ -22,7 +22,7 @@ description: Igness LAMP のリッチメニュー（LINE トーク画面下部�
 
 ## 前提条件
 
-- LAMP 基本パッケージ **1.157 以降**（発行・削除アクション、有効化エラー項目）。タブ付きレイアウト（`TAB*`）・自由配置（`igns__AreasJson__c`）・12 領域・バージョンと分析（`igns__RichMenuVersion__c` / `igns__LampGetRichMenuInsightsAction`）は **リッチメニュービルダー対応版以降**。項目やアクションが無く `No such column` / 404 になる org では、それらを使わず従来の範囲で行う
+- LAMP 基本パッケージ **1.157 以降**（発行・削除アクション、有効化エラー項目）。タブ付きレイアウト（`TAB*`）・自由配置（`igns__AreasJson__c`）・12 領域・バージョンと分析（`igns__RichMenuVersion__c` / `igns__LampGetRichMenuInsightsAction`）は **1.161 以降**。項目やアクションが無く `No such column` / 404 になる org では、それらを使わず従来の範囲で行う
 - `sf` CLI で対象 org に認証済み（以下 `<org>`）。API バージョン v67.0 以上
 - 実行ユーザーに `LAMP_SystemAdministrator` または `LAMP_MarketingAdministrator` 権限セットグループ
 - 公式アカウント（`igns__SocialAccount__c`）が接続済み
