@@ -20,7 +20,7 @@ LAMP/BRAINパッケージ（バージョン1.153以降）をインストール�
 
 ## Step 1: 初期セットアップの実行
 
-パッケージのインストールでは組織のメタデータは変更されない（バージョン 1.157 以降）。権限セットグループ 6 件・ローカル権限セット・スケジュールジョブ 3 件（日次 2 件・配信終了処理の毎時 1 件）は、次のアクションで管理者の権限で作成する（冪等・何度実行しても安全。既に揃っている組織では何も作らず `executed: false` を返す）:
+パッケージのインストールでは組織のメタデータは変更されない（バージョン 1.157 以降）。権限セットグループ 6 件・ローカル権限セット・スケジュールジョブ 4 件（日次 2 件・配信終了処理の毎時 1 件・リッチメニュー統計の日次 1 件）は、次のアクションで管理者の権限で作成する（冪等・何度実行しても安全。既に揃っている組織では何も作らず `executed: false` を返す）:
 
 ```bash
 sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampAutoSetupAction" --method POST -b '{"inputs":[{}]}' -o <org>
@@ -33,7 +33,8 @@ sf data query -q "SELECT DeveloperName, Status FROM PermissionSetGroup WHERE Dev
 sf data query -q "SELECT CronJobDetail.Name FROM CronTrigger WHERE CronJobDetail.Name LIKE 'LAMP - %'" -o <org>
 ```
 
-- 権限セットグループ6件（LAMP_SystemAdministrator_Group / LAMP_User_Group / LAMP_MarketingAdministrator_Group / LAMP_MarketingUser_Group / BRAIN_Administrator_Group / BRAIN_User_Group）とスケジュールジョブ3件（`LAMP - ReplyHistoryScheduler Daily Job` / `LAMP - AggregationUpdateBatch Daily Job` / `LAMP - Broadcast End Sweeper Hourly Job`）が揃っていれば完了。1.153〜1.156 では毎時ジョブが無く2件で正常
+- 権限セットグループ6件（LAMP_SystemAdministrator_Group / LAMP_User_Group / LAMP_MarketingAdministrator_Group / LAMP_MarketingUser_Group / BRAIN_Administrator_Group / BRAIN_User_Group）とスケジュールジョブ4件（`LAMP - ReplyHistoryScheduler Daily Job` / `LAMP - AggregationUpdateBatch Daily Job` / `LAMP - Broadcast End Sweeper Hourly Job` / `LAMP - RichMenuVersionStatsJob Daily Job`）が揃っていれば完了。1.153〜1.156 では毎時ジョブが無く2件、1.157〜1.160 ではリッチメニュー統計ジョブが無く3件で正常
+- **パッケージをアップグレードした組織でも、このアクションをもう一度実行する**。新しいバージョンで増えたスケジュールジョブ（例: リッチメニュー統計ジョブ）はアップグレードだけでは登録されず、このアクション（または設定アシスタントの「スケジューラー作成」の実行ボタンの押し直し）で不足分だけ登録される。`{"inputs":[{"checkOnly":true}]}` で不足の有無だけを確認できる
 - `Status` が `Updated` でないグループは再計算中。数分待って再確認する
 - 1.153〜1.156 でインストールした組織では一部がインストール時に自動作成されているが、同じアクションを実行して問題ない（不足分だけ作られる）
 

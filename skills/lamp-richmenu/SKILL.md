@@ -204,5 +204,6 @@ sf data query -q "SELECT Name, igns__VersionNumber__c, igns__IsCurrent__c, igns_
 | `RichMenuStatus__c` が `updating` のまま長い | 非同期処理の失敗。`RichMenuErrorMessage__c` を確認し、値を一度 `null` にしてから再設定 |
 | `richmenuswitch` で切り替わらない | 切替先が未発行（切替先を ⑤ で発行すれば、このメニューを再発行しなくても切り替わる）か、別の公式アカウントのメニューを指定している |
 | 自由配置が無効（`IsValid__c=false`） | `AreasJson__c` の値が整数でない・画像の範囲外・13 個以上、または `ImageWidth__c` / `ImageHeight__c` が空 |
+| バージョンの表示回数・タップ数の項目が空のまま（アクション・画面では数値が出る） | リッチメニュー統計の日次ジョブが未登録（パッケージをアップグレードした組織で起きる）。`lamp-setup` の Step 1（`igns__LampAutoSetupAction`）を実行すると登録される |
 | 分析が `below_threshold` のまま | 期間中にタップした人が 20 人未満（LINE の仕様）。期間を広げると出ることがある |
 | 発行で `HTTP 403` | 公式アカウント接続の直後（最大 10 分）か、サーバー認証切れ |
