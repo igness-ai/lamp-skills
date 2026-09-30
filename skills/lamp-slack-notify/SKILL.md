@@ -23,7 +23,7 @@ LINE の出来事 → LAMP が igns__LampNotification__e を発行
 
 | ひな形 | 起動 | 使う用途 |
 |---|---|---|
-| `LAMP_Slack_OnLineEvent` | プラットフォームイベント `igns__LampNotification__e` | メッセージ受信、ブロック／ブロック解除、特定ボタンの押下、LIFF ログイン、コンバージョン、送信の通知 |
+| `LAMP_Slack_OnLineEvent` | プラットフォームイベント `igns__LampNotification__e` | メッセージ受信、ブロック／ブロック解除、特定ボタンの押下、LIFF ログイン、送信の通知 |
 | `LAMP_Slack_OnNewFriend` | 友だち（`igns__SocialFriend__c`）の作成・コミット後の非同期パス | 友だち追加 |
 
 友だち追加をプラットフォームイベント（`ADD_FRIEND`）で拾うと、LAMP が友だちレコードを作る処理と並行して動くため、まだ友だちが見つからず通知が抜けることがある。友だち追加は必ず `LAMP_Slack_OnNewFriend` を使う。
@@ -74,8 +74,9 @@ LINE の出来事 → LAMP が igns__LampNotification__e を発行
 | incoming | `ADD_FRIEND` / `BLOCKED` / `UNBLOCKED` | 友だち追加・ブロック・ブロック解除 |
 | incoming | `RICHMENU_CHANGED` | タブ切り替えなどでリッチメニューが変わった |
 | incoming | `LOGIN` | 流入経路の URL（LIFF）を開いた |
-| incoming | `CONVERSION` | コンバージョンが記録された |
 | outgoing | `MSG_TEXT` / `MSG_IMAGE` / `MSG_VIDEO` / `MSG_FLEX` など | 公式アカウントからの送信（1to1・自動応答・配信） |
+
+コンバージョンはプラットフォームイベントを通らない（現行パッケージではバックエンドが Apex REST `/tracking/events` へ送り、友だちアクティビティ `igns__SocialFriendActivity__c` に `igns__Conversion__c` 付きで記録する。`CONVERSION` のイベントが出るのは、この Apex REST を持たない古いパッケージの org だけ）。コンバージョンを通知するときは `LAMP_Slack_OnNewFriend` をもとに、起動オブジェクトを `igns__SocialFriendActivity__c`（作成時・非同期パス）に変え、`igns__Conversion__c` が空でないものだけを対象にする。友だちへのリンクは `$Record.igns__SocialFriend__c` から組み立てる。
 
 `outgoing` を通知にすると、一斉配信では宛先の人数分の通知が出る。送信の通知は用途（例: 特定の公式アカウントだけ）を絞る。
 
