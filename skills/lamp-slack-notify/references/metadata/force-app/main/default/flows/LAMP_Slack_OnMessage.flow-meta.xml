@@ -73,15 +73,14 @@
             <label>特定できた</label>
         </rules>
     </decisions>
-    <description>LAMP のプラットフォームイベントで起動し、条件に合う LINE の出来事を Slack に通知する。（lamp-slack-notify）</description>
+    <description>LAMP のプラットフォームイベントで起動し、友だちから受信したメッセージを Slack に通知する。（lamp-slack-notify）</description>
     <formulas>
-        <description>通知対象か。方向・イベント種別（カンマ区切り）・公式アカウント（空なら全て）・ボタン等の表示文（空なら問わない）で判定する。</description>
+        <description>通知対象か。受信（incoming）で、イベント種別（カンマ区切り）に含まれ、公式アカウント（空なら全て）が一致するもの。</description>
         <name>IsTarget</name>
         <dataType>Boolean</dataType>
-        <expression>{!$Record.igns__Direction__c} = &quot;{{DIRECTION}}&quot;
+        <expression>{!$Record.igns__Direction__c} = &quot;incoming&quot;
 &amp;&amp; CONTAINS(&quot;,{{EVENT_TYPES}},&quot;, &quot;,&quot; &amp; {!$Record.igns__EventType__c} &amp; &quot;,&quot;)
-&amp;&amp; (&quot;{{LAMP_ID}}&quot; = &quot;&quot; || {!$Record.igns__LampId__c} = &quot;{{LAMP_ID}}&quot;)
-&amp;&amp; (&quot;{{MESSAGE_EQUALS}}&quot; = &quot;&quot; || {!$Record.igns__Message__c} = &quot;{{MESSAGE_EQUALS}}&quot;)</expression>
+&amp;&amp; (&quot;{{LAMP_ID}}&quot; = &quot;&quot; || {!$Record.igns__LampId__c} = &quot;{{LAMP_ID}}&quot;)</expression>
     </formulas>
     <formulas>
         <description>友だちレコードへの Slack リンク（組織のURLから組み立てる）。</description>
