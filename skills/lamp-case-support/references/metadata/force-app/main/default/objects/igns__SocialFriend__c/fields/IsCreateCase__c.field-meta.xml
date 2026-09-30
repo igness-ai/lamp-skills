@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>IsCreateCase__c</fullName>
+    <label>ケース起動</label>
+    <type>Checkbox</type>
+    <defaultValue>false</defaultValue>
+    <description>オンになるとフローがケースを作成し、オフに戻す。テンプレートの項目設定から書き込む。</description>
+    <inlineHelpText>ボタン操作でオンになり、ケース作成後に自動でオフに戻ります。</inlineHelpText>
+</CustomField>
