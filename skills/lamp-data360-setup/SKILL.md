@@ -36,9 +36,32 @@ sf package installed list -o <org> --json | jq -r '.result[] | select(.Subscribe
 sf api request rest "/services/data/v67.0/ssot/data-streams" -o <org> | jq -r '.dataStreams[] | "\(.name)\t\(.dataStreamStatus)"'
 ```
 
-`Igness_LAMP_Timeline_…`・`igns_SocialFriend_c_Home`・`igns_Reply_c_Home`・`igns_Broadcast_c_Home` の4本が `ACTIVE` なら展開済み。手順3へ進む。一部だけある場合は、重ねて展開せず、まず状況を利用者に伝える。
+`Igness_LAMP_Timeline_…`・`igns_SocialFriend_c_Home`・`igns_Reply_c_Home`・`igns_Broadcast_c_Home` の4本が `ACTIVE` なら展開済み。手順2の権限を確かめてから手順4へ進む。一部だけある場合は、重ねて展開せず、まず状況を利用者に伝える。
 
-## 2. Data Kit を展開する
+## 2. コネクタの読み取り権限を確かめる（展開の前に）
+
+Data 360 の Salesforce CRM コネクタは、権限セット `sfdc_a360_sfcrm_data_extract`（画面の表示名「Data Cloud Salesforce Connector」）の権限でレコードを読む。この権限セットの中身は org によって違い、**Data 360 が有効でも LAMP のオブジェクトを読めない org がある**（「すべてのデータの参照」が無く、オブジェクトごとに権限を付ける形の org）。その場合、展開が失敗するか、ストリームが成功と表示されたまま0件になる。
+
+```bash
+sf data query -q "SELECT PermissionsViewAllData FROM PermissionSet WHERE Name = 'sfdc_a360_sfcrm_data_extract'" -o <org>
+```
+
+`PermissionsViewAllData` が `true` なら、すべて読めるので手順3へ進む。`false` なら、オブジェクトと項目の権限を確かめる。
+
+```bash
+sf data query -q "SELECT SobjectType, PermissionsRead, PermissionsViewAllRecords FROM ObjectPermissions WHERE Parent.Name = 'sfdc_a360_sfcrm_data_extract' AND SobjectType IN ('igns__SocialFriend__c','igns__Reply__c','igns__Broadcast__c')" -o <org>
+sf data query -q "SELECT Field FROM FieldPermissions WHERE Parent.Name = 'sfdc_a360_sfcrm_data_extract' AND PermissionsRead = true AND SobjectType IN ('igns__SocialFriend__c','igns__Reply__c','igns__Broadcast__c')" -o <org>
+```
+
+- オブジェクト: 3件とも `PermissionsRead` と `PermissionsViewAllRecords` が `true` であること。
+- 項目: 次の項目がすべて返ること（必須項目は一覧に無くても読める）。
+  - `igns__SocialFriend__c`: ClickCount__c, Contact__c, CurrentAIReplyHistory__c, Email__c, FirstSocialFriendActivity__c, FirstSocialFriendActivityDateTime__c, FirstSocialFriendActivitySourceName__c, IsActionRequired__c, IsAIReply__c, IsBlocked__c, IsTest__c, LampId__c, Language__c, LastClickedAt__c, LastConvertedAt__c, LastMessageDate__c, LastSentMessageDateTime__c, Lead__c, NonReply__c, PictureUrl__c, RichMenu__c, SocialAccount__c, StatusMessageText__c, UserId__c（すべて `igns__` 付き）
+  - `igns__Reply__c`: Agent__c, AgentforceAgentApiName__c, ConversationEndHour__c, Sender__c, SocialAccount__c, Sort__c, Template__c
+  - `igns__Broadcast__c`: AllowDuplicate__c, Cron__c, CsvFileId__c, EndDateTime__c, IsSystem__c, JobId__c, LastError__c, LastErrorAt__c, Mode__c, NextExecutionDate__c, ReportId__c, ScheduleTimeZone__c, StartDateTime__c, StreamType__c, Template__c
+
+足りないものがあれば、不足している一覧を利用者に示し、画面での付与を案内する（［設定］→［権限セット］→「Data Cloud Salesforce Connector」→［オブジェクト設定］→ 各オブジェクトの［編集］で「参照」「すべてのレコードの参照」と項目の「参照アクセス権」）。お客様の権限設定を変える操作なので、このスキルから書き換えない。付与が済んだら、上の照会でもう一度確かめてから手順3へ進む。
+
+## 3. Data Kit を展開する
 
 インストール直後は定義が届いているだけで、データストリームもデータモデルも無い。次の1回で、取り込みAPIの接続「Igness_LAMP」、データストリーム4本、データモデル、リレーションが作られる（約3分）。
 
@@ -69,16 +92,6 @@ sf data query -q "SELECT FIELDS(ALL) FROM DataKitDeploymentLog WHERE JobIdentifi
 
 画面つきの手順はヘルプの「Data 360連携を設定したい」を案内する。
 
-## 3. コネクタの読み取り権限を確かめる
-
-Data 360 の Salesforce CRM コネクタは、権限セット `sfdc_a360_sfcrm_data_extract` の権限でレコードを読む。**LAMP を先に入れ、後から Data 360 を有効にした org では、LAMP のオブジェクトへの読み取りが付いていない**ことがある（その場合、ストリームは成功と表示されたまま0件になる）。
-
-```bash
-sf data query -q "SELECT SobjectType, PermissionsRead, PermissionsViewAllRecords FROM ObjectPermissions WHERE Parent.Name = 'sfdc_a360_sfcrm_data_extract' AND SobjectType IN ('igns__SocialFriend__c','igns__Reply__c','igns__Broadcast__c')" -o <org>
-```
-
-3件とも `PermissionsRead` と `PermissionsViewAllRecords` が `true` であること。足りないオブジェクトがあれば、利用者に確認のうえ、権限セット「Data Cloud Salesforce Connector」（日本語の画面でも英語表記。API参照名 `sfdc_a360_sfcrm_data_extract`）に「参照」と「すべてのレコードの参照」、および取り込む項目の参照権限を付ける（［設定］→［権限セット］）。お客様の権限設定を変える操作なので、無断で行わない。
-
 ## 4. 着信を確かめる
 
 友だち・自動応答・配信は、展開の直後と、その後おおむね15分ごとに同期される。
@@ -96,7 +109,7 @@ EOF
 sf api request rest "/services/data/v67.0/ssot/queryv2" --method POST --body @/tmp/lamp-data360-count.json -o <org>
 ```
 
-会話が0件のままなら、①手順2が `Successful` か、②契約で連携が有効か、認証のやり直しが必要でないか（どちらも Igness へ確認。送信が止まっている理由は Igness 側で把握している）の順に確かめる。過去の会話は自動では入らない。必要なら、契約の管理者が Igness のアカウント画面で「過去の会話をData 360に送信」を実行する。
+会話が0件のままなら、①手順3の展開が `Successful` か、②契約で連携が有効か、認証のやり直しが必要でないか（どちらも Igness へ確認。送信が止まっている理由は Igness 側で把握している）の順に確かめる。過去の会話は自動では入らない。必要なら、契約の管理者が Igness のアカウント画面で「過去の会話をData 360に送信」を実行する。
 
 ## 取り込まれるもの
 
