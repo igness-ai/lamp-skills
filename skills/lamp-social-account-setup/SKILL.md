@@ -1,6 +1,6 @@
 ---
 name: lamp-social-account-setup
-description: LAMPにLINE公式アカウントを接続する（初回・2つ目以降の追加どちらも）。Messaging APIチャネルの接続、LINEログインチャネルからのLIFF自動作成、公式アカウントレコード作成、連携項目、疎通確認までをLAMPの設定アクションで進め、接続済みアカウントの一覧確認・再認証・解除の案内も行う。「公式アカウントを接続して」「公式アカウントを追加して」「2つ目のLINE公式アカウントをつなげて」「別の公式アカウントも使いたい」などで使用。
+description: LAMPにLINE公式アカウントを接続する（初回・2つ目以降の追加どちらも）。Messaging APIチャネルの接続、LINEログインチャネルからのLIFF自動作成、公式アカウントレコード作成、連携項目、疎通確認までをLAMPの設定アクションで進め、接続済みアカウントの一覧確認・再認証・解除・Webhook転送の設定変更も行う。「公式アカウントを接続して」「公式アカウントを追加して」「2つ目のLINE公式アカウントをつなげて」「別の公式アカウントも使いたい」「Webhook転送を設定して」「転送先URLを変えて」などで使用。
 ---
 
 # LINE公式アカウントの接続（追加）
@@ -165,6 +165,41 @@ rm -f /tmp/lamp-reauth.json
 - **デフォルトのリッチメニュー**: `lamp-richmenu` の適用手順
 - **接続解除**: [接続を解除したい](https://help.igness.ai/lamp/misc/disconnect-line-account) の手順（LINE Developersで「Webhookの利用」をOFF → 公式アカウントレコードを削除）。レコード削除は元に戻せないため、**ユーザーが明示的に依頼し、対象レコードを確認した場合にのみ**実行する
 
+### Webhook転送の取得・変更・接続テスト
+
+Webhook転送アクションは **1.160系の対応パッケージが必要（本リリース前）**。公開前に対応バージョンを確定する。既存のLINE受信口（LINE Developersに登録するWebhook URL）と、ここで設定する**外部への転送先URL**を混同しない。
+
+1. Step 0 の一覧から `socialAccountId` を特定し、取得する。取得結果の `url` は秘密を含み得るため、コマンド結果を会話へそのまま出さず、ホスト名・ON/OFF・枠・直近結果だけを報告する。
+
+```bash
+sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampGetWebhookAction" --method POST -b '{"inputs":[{"socialAccountId":"<レコードID>"}]}' -o <org>
+```
+
+2. ONにする・URLを変更する場合は、**対象組織、公式アカウント、転送先ホスト名、友だちの会話データがその宛先へ送られること**を示して明示的な了承を得る。今回の依頼ですでにその操作を具体的に了承している場合は重ねて確認しない。URLを推測・補完しない。実行には `LAMP_SystemAdministrator` が必要。
+3. 転送先URLはチャネルシークレットと同じように、アクセス制限した一時ファイルにJSONを作り、`-b @ファイル` で渡す。シェル引数・コマンド履歴・報告にURLのパスやクエリを残さない。URL変更・ONにする場合は、保存前に次の接続テストを行う。テスト用ファイルは `{"inputs":[{"socialAccountId":"<レコードID>","url":"<ユーザー指定URL>"}]}`。空eventsを送信し、保存済み設定・契約枠は変更しない。
+
+```bash
+sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampTestWebhookAction" --method POST -b @<テスト用JSONファイル> -o <org>
+```
+
+4. テストの `success` がtrueの場合だけ同じURLを保存する。OFFのみ・OFF時のURL削除ではテスト不要。保存用ファイルの構造: `{"inputs":[{"socialAccountId":"<レコードID>","enabled":true,"url":"<ユーザー指定URL>"}]}`。`enabled`・`url` の省略は現状維持、無効時の `url: ""` は保存URLの削除。実行後に一時ファイルを削除する。エラーは `errorCode` で判定し、不明な通信結果で再実行する前には取得アクションで状態を照合する。
+
+```bash
+sf api request rest "/services/data/v67.0/actions/custom/apex/igns__LampSetWebhookAction" --method POST -b @<保存用JSONファイル> -o <org>
+```
+
+5. 取得アクションで保存状態を再確認し、ホスト名・ON/OFF・枠・接続テスト結果を報告する。2xxはHTTP受信の確認であり、受信側の業務処理成功とは限らない。
+
+| 結果 | 対応 |
+|---|---|
+| `WEBHOOK_OPTION_REQUIRED` / `WEBHOOK_LIMIT_REACHED` | オプション契約または枠の追加をIgnessへ相談 |
+| `INVALID_WEBHOOK_URL` | HTTPS・443番ポート・公開ホストを確認。内部IP・LAMP自身のURLは使えない |
+| `BUSY` | 取得で現在値を再確認してから必要な変更だけ再実行 |
+| `timeout` | 転送先が1.5秒以内に応答する必要がある |
+| アクションが404 | 対応前のパッケージ。公式アカウントの編集画面にWebhook転送セクションがあれば画面操作を案内し、なければアップグレードを案内 |
+
+転送は署名の成否によらず原文を1回だけ送る。受信側で `x-line-signature` を検証する。自動再送はなく、LINE側の再送による重複は受信側で除外する。外部ツールが先にReplyするとLAMPがPushへ切り替わり二重返信になり得るため、返信担当は運用で決める。
+
 ## トラブルシューティング
 
 | 症状 | 確認・対処 |
@@ -177,3 +212,5 @@ rm -f /tmp/lamp-reauth.json
 | 疎通確認で友だちレコードが増えない | 「Webhookの利用」がOFF、Webhook URLの不一致（レコードページの表示と LINE Developers を比較）、応答設定。ユーザーが別の公式アカウントを友だち追加していないか |
 | 接続直後のテンプレート送信・発行が403 | 最大10分待って再実行。10分を超えて続くならサーバー認証の状態を Step 0 で確認 |
 | 運用中のアカウントで送信が401になる／友だち追加が検知されなくなった | LINE側でチャネルシークレットが再発行された可能性。「既存アカウントの確認・変更」の再認証を実行する |
+
+| 転送先に届かない | `LampGetWebhookAction` のON/OFF・`lastOutcome`を確認し、接続テストと転送先の1.5秒以内の応答を確認する |
