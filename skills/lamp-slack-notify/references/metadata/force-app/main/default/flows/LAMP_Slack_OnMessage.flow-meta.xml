@@ -79,6 +79,7 @@
         <name>IsTarget</name>
         <dataType>Boolean</dataType>
         <expression>{!$Record.igns__Direction__c} = &quot;incoming&quot;
+&amp;&amp; ISBLANK({!$Record.igns__GroupId__c})
 &amp;&amp; CONTAINS(&quot;,{{EVENT_TYPES}},&quot;, &quot;,&quot; &amp; {!$Record.igns__EventType__c} &amp; &quot;,&quot;)
 &amp;&amp; (&quot;{{LAMP_ID}}&quot; = &quot;&quot; || {!$Record.igns__LampId__c} = &quot;{{LAMP_ID}}&quot;)</expression>
     </formulas>
