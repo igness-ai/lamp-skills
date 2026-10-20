@@ -1,0 +1,111 @@
+{
+  "name": "お問い合わせ",
+  "definition": {
+    "questions": [
+      {
+        "id": "q_name0001",
+        "type": "text",
+        "label": "お名前",
+        "required": true,
+        "maxLength": 80
+      },
+      {
+        "id": "q_comp0001",
+        "type": "text",
+        "label": "会社名",
+        "maxLength": 80
+      },
+      {
+        "id": "q_mail0001",
+        "type": "email",
+        "label": "メールアドレス",
+        "required": true,
+        "maxLength": 80
+      },
+      {
+        "id": "q_tel00001",
+        "type": "tel",
+        "label": "電話番号"
+      },
+      {
+        "id": "q_subj0001",
+        "type": "text",
+        "label": "件名",
+        "required": true,
+        "maxLength": 255
+      },
+      {
+        "id": "q_body0001",
+        "type": "textarea",
+        "label": "お問い合わせ内容",
+        "required": true,
+        "maxLength": 2000
+      }
+    ]
+  },
+  "target": {
+    "objectApiName": "Case",
+    "recordTypeId": null,
+    "saveMode": "create"
+  },
+  "mapping": {
+    "fields": [
+      {
+        "fieldApiName": "SuppliedName",
+        "source": "question",
+        "questionId": "q_name0001"
+      },
+      {
+        "fieldApiName": "SuppliedCompany",
+        "source": "question",
+        "questionId": "q_comp0001"
+      },
+      {
+        "fieldApiName": "SuppliedEmail",
+        "source": "question",
+        "questionId": "q_mail0001"
+      },
+      {
+        "fieldApiName": "SuppliedPhone",
+        "source": "question",
+        "questionId": "q_tel00001"
+      },
+      {
+        "fieldApiName": "Subject",
+        "source": "question",
+        "questionId": "q_subj0001"
+      },
+      {
+        "fieldApiName": "Description",
+        "source": "question",
+        "questionId": "q_body0001"
+      }
+    ]
+  },
+  "settings": {
+    "allowedLampIds": null,
+    "responseLimit": "unlimited",
+    "completionPage": {
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "送信ありがとうございました"
+        }
+      ]
+    },
+    "submitLabel": "送信する",
+    "title": null,
+    "theme": {
+      "primaryColor": "#06C755"
+    },
+    "layout": "single",
+    "linkFriend": {
+      "enabled": true,
+      "overwrite": false
+    },
+    "campaign": null
+  },
+  "completion": {
+    "templateId": null
+  }
+}
