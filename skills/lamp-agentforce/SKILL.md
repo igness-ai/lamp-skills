@@ -142,13 +142,34 @@ sf api request rest "/services/data/v67.0/sobjects/igns__AutoKeyword__c" --metho
 
 ## 4. Agentforce に渡す友だち情報（必要な場合）
 
-LAMP が渡す変数名は次のとおり。利用する変数を Salesforce 側の Agentforce に用意し、**Allow value to be set by API** を有効にする。
+LAMP は `generateAiAgentResponse` に次の名前で値を渡す。
 
 | 変数名 | 値 |
 |---|---|
-| `SocialFriendId` | 友だちの Salesforce レコード Id |
+| `SocialFriendId` | 友だちの Salesforce レコード Id（常に渡す） |
 | `Contact` | 友だちに関連する取引先責任者の Id（関連がある場合のみ） |
 | `Lead` | 友だちに関連するリードの Id（関連がある場合のみ） |
+
+**エージェント側の変数は「メッセージングセッション変数」（Agent Script の `linked` 変数）で作る。** `generateAiAgentResponse` の入力になるのはこの種類だけで、カスタム変数（`mutable` + `visibility: "External"`、Builder の「API 更新アクセス権を有効化」）は、エラーにならないまま値が捨てられる。「Allow value to be set by API」を ON にする案内はしない。
+
+1. `MessagingSession` にテキスト項目（18文字）を作る。項目の API 名は変数名と同じにする（`SocialFriendId__c`。`Contact` / `Lead` も使うなら `Contact__c` / `Lead__c`）。項目に値は入らない。変数の宣言のためだけに使う。Builder の一覧は表示ラベルで検索し、設定する管理者が参照できる項目だけが出る。
+2. エージェントに変数を追加する。Builder では、下書きバージョンの「変数」→[新規]→[メッセージングセッション変数を追加]でその項目を選ぶ。変数名は項目の API 名から `__c` を除いたものになる。Agent Script では次のように書く。
+
+```
+variables:
+    SocialFriendId: linked string
+        label: "LINE友だちID"
+        source: @MessagingSession.SocialFriendId__c
+```
+
+3. アクションの入力に `@variables.SocialFriendId` を割り当て、バージョンを確定・有効化する。
+4. 受け口に出ていることを確認する。`inputs` に `SocialFriendId` が無ければ値は届かない。
+
+```bash
+sf api request rest "/services/data/v65.0/actions/custom/generateAiAgentResponse/<agentApiName>" -o <org> > /tmp/lamp-agentforce-inputs.json
+```
+
+メッセージングセッション変数はエージェントの全バージョンで共有される。下書きで削除すると有効なバージョンにも影響するため、作り直すときは新しいバージョンの有効化まで続けて行う。値は会話の始めに設定され、会話の途中で友だちの紐づけを変えても反映されない。
 
 `ContactId` / `LeadId` へ勝手に読み替えない。変数は識別子であり、人物情報そのものではない。関連レコードを読むアクションには、そのレコードへのアクセス権も必要。
 
@@ -205,11 +226,11 @@ sf api request rest "/services/data/v67.0/sobjects/igns__ReplyHistory__c/<curren
 | `agentforce_error` | Agentforce 呼び出し失敗。エージェントの有効化・API 参照名・実行ユーザーのアクセス権を確認 |
 | `agentforce_timeout` / `agentforce_network_error` | タイムアウト／処理例外の分類。詳細がこの項目に残るとは限らない。対象時間帯のジョブ・ログを確認してから再テストする |
 | `IsProcessing__c=true` のまま／エラー履歴がないのに届かない | 回答生成に入る前の loading 処理や配送ジョブの失敗もあり得る。`AsyncApexJob` の `AgentforceMessageServiceJob` / `LampReplyMessageJob` / `ErrorMessageSendJob` をテスト開始時刻・実行ユーザーで絞り、`Status` / `ExtendedStatus` を確認。共有ジョブの最新1件だけで当該友だちの成功を断定しない |
-| 友だちの関連情報が渡らない | `Contact` / `Lead` の関連、変数名、API からの値設定の許可、アクションの参照権限を確認 |
+| 友だちの関連情報が渡らない | 変数がメッセージングセッション変数か（カスタム変数では届かない）、変数名の大文字・小文字、`generateAiAgentResponse` の `inputs` に出ているか、`Contact` / `Lead` の関連、アクションの参照権限を確認 |
 | 指定時間が過ぎても会話が続く | 自動終了は日次。`ReplyHistoryScheduler` の稼働と最終応答日時を確認 |
 
 - 現行の Agentforce 経路はテキスト入力・テキスト返信。受信画像は `[画像メッセージ]`、動画等は種別の文字列に置換され、画像内容の解析は行わない。回答の画像・カード・クイックリプライへの自動変換はない。
 - 処理中の連投は保留され、次のターンで改行連結される。セッション無効を検知した場合、製品側が新しいセッションで1回だけ再試行することがある。
 - 継続キーは `AgentforceSessionId__c`。`ConversationId__c` は空で正常であり、Agentforce セッション Id を `/conversation/{id}` に渡さない。LINE 上の送受信履歴と Agentforce 内部の推論履歴は別物。
 
-Salesforce 側の前提を調べる場合は [Agentforce の Apex / Flow 呼び出し](https://developer.salesforce.com/blogs/2025/04/invoke-agentforce-agents-with-apex-and-flow) と [API から設定する変数](https://developer.salesforce.com/docs/ai/agentforce/guide/agent-api-variables.html) を参照する。LAMP 固有の開始・終了動作は上記手順に従う。
+Salesforce 側の前提を調べる場合は [Agentforce の Apex / Flow 呼び出し](https://developer.salesforce.com/blogs/2025/04/invoke-agentforce-agents-with-apex-and-flow) を参照する。[API から設定する変数](https://developer.salesforce.com/docs/ai/agentforce/guide/agent-api-variables.html) は Agent API（REST のセッション開始）向けで、LAMP の呼び出し方には当てはまらない。LAMP 固有の開始・終了動作は上記手順に従う。
