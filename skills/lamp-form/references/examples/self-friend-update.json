@@ -1,0 +1,60 @@
+{
+  "name": "登録内容の変更",
+  "definition": {
+    "questions": [
+      {
+        "id": "q_mail0001",
+        "type": "email",
+        "label": "メールアドレス",
+        "required": true,
+        "maxLength": 80
+      }
+    ]
+  },
+  "target": {
+    "objectApiName": "igns__SocialFriend__c",
+    "recordTypeId": null,
+    "saveMode": "upsert",
+    "externalIdField": "Id"
+  },
+  "mapping": {
+    "fields": [
+      {
+        "fieldApiName": "Id",
+        "source": "context",
+        "contextKey": "socialFriendId"
+      },
+      {
+        "fieldApiName": "igns__Email__c",
+        "source": "question",
+        "questionId": "q_mail0001"
+      }
+    ]
+  },
+  "settings": {
+    "allowedLampIds": null,
+    "responseLimit": "unlimited",
+    "completionPage": {
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "送信ありがとうございました"
+        }
+      ]
+    },
+    "submitLabel": "送信する",
+    "title": null,
+    "theme": {
+      "primaryColor": "#06C755"
+    },
+    "layout": "single",
+    "linkFriend": {
+      "enabled": false,
+      "overwrite": false
+    },
+    "campaign": null
+  },
+  "completion": {
+    "templateId": null
+  }
+}

@@ -1,0 +1,135 @@
+{
+  "name": "資料請求",
+  "definition": {
+    "questions": [
+      {
+        "id": "q_name0001",
+        "type": "name",
+        "label": "氏名",
+        "required": true
+      },
+      {
+        "id": "q_comp0001",
+        "type": "text",
+        "label": "会社名",
+        "required": true,
+        "maxLength": 255
+      },
+      {
+        "id": "q_mail0001",
+        "type": "email",
+        "label": "メールアドレス",
+        "required": true,
+        "maxLength": 80
+      },
+      {
+        "id": "q_tel00001",
+        "type": "tel",
+        "label": "電話番号"
+      },
+      {
+        "id": "q_addr0001",
+        "type": "address",
+        "label": "住所",
+        "required": true
+      },
+      {
+        "id": "q_note0001",
+        "type": "textarea",
+        "label": "ご要望・ご質問",
+        "maxLength": 2000
+      }
+    ]
+  },
+  "target": {
+    "objectApiName": "Lead",
+    "recordTypeId": null,
+    "saveMode": "create"
+  },
+  "mapping": {
+    "fields": [
+      {
+        "fieldApiName": "LastName",
+        "source": "question",
+        "questionId": "q_name0001",
+        "part": "lastName"
+      },
+      {
+        "fieldApiName": "FirstName",
+        "source": "question",
+        "questionId": "q_name0001",
+        "part": "firstName"
+      },
+      {
+        "fieldApiName": "Company",
+        "source": "question",
+        "questionId": "q_comp0001"
+      },
+      {
+        "fieldApiName": "Email",
+        "source": "question",
+        "questionId": "q_mail0001"
+      },
+      {
+        "fieldApiName": "Phone",
+        "source": "question",
+        "questionId": "q_tel00001"
+      },
+      {
+        "fieldApiName": "PostalCode",
+        "source": "question",
+        "questionId": "q_addr0001",
+        "part": "postalCode"
+      },
+      {
+        "fieldApiName": "State",
+        "source": "question",
+        "questionId": "q_addr0001",
+        "part": "prefecture"
+      },
+      {
+        "fieldApiName": "City",
+        "source": "question",
+        "questionId": "q_addr0001",
+        "part": "city"
+      },
+      {
+        "fieldApiName": "Street",
+        "source": "question",
+        "questionId": "q_addr0001",
+        "part": "street"
+      },
+      {
+        "fieldApiName": "Description",
+        "source": "question",
+        "questionId": "q_note0001"
+      }
+    ]
+  },
+  "settings": {
+    "allowedLampIds": null,
+    "responseLimit": "unlimited",
+    "completionPage": {
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "送信ありがとうございました"
+        }
+      ]
+    },
+    "submitLabel": "送信する",
+    "title": null,
+    "theme": {
+      "primaryColor": "#06C755"
+    },
+    "layout": "single",
+    "linkFriend": {
+      "enabled": true,
+      "overwrite": false
+    },
+    "campaign": null
+  },
+  "completion": {
+    "templateId": null
+  }
+}

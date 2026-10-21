@@ -1,0 +1,183 @@
+{
+  "name": "セミナー申込",
+  "definition": {
+    "questions": [
+      {
+        "id": "q_head0001",
+        "type": "heading",
+        "label": "見出し",
+        "text": "お申し込み内容"
+      },
+      {
+        "id": "q_name0001",
+        "type": "name",
+        "label": "氏名",
+        "required": true
+      },
+      {
+        "id": "q_comp0001",
+        "type": "text",
+        "label": "会社名",
+        "required": true,
+        "maxLength": 255
+      },
+      {
+        "id": "q_mail0001",
+        "type": "email",
+        "label": "メールアドレス",
+        "required": true,
+        "maxLength": 80
+      },
+      {
+        "id": "q_join0001",
+        "type": "radio",
+        "label": "参加方法",
+        "required": true,
+        "options": [
+          {
+            "label": "オンライン",
+            "value": "online"
+          },
+          {
+            "label": "会場",
+            "value": "venue"
+          }
+        ]
+      },
+      {
+        "id": "q_seat0001",
+        "type": "number",
+        "label": "会場での参加人数",
+        "required": true,
+        "scale": 0,
+        "min": 1,
+        "max": 5,
+        "unit": "名",
+        "unitPosition": "suffix",
+        "condition": {
+          "questionId": "q_join0001",
+          "operator": "equals",
+          "value": "venue"
+        }
+      },
+      {
+        "id": "q_agree001",
+        "type": "consent",
+        "label": "個人情報の取り扱い",
+        "consentText": "ご入力いただいた情報は、セミナーのご案内とご連絡のためだけに使います。"
+      },
+      {
+        "id": "q_src00001",
+        "type": "hidden",
+        "label": "流入元",
+        "paramName": "src",
+        "maxLength": 40,
+        "allowedValues": [
+          "Web",
+          "Other"
+        ],
+        "defaultValue": "Web"
+      }
+    ]
+  },
+  "target": {
+    "objectApiName": "Lead",
+    "recordTypeId": null,
+    "saveMode": "create"
+  },
+  "mapping": {
+    "fields": [
+      {
+        "fieldApiName": "LastName",
+        "source": "question",
+        "questionId": "q_name0001",
+        "part": "lastName"
+      },
+      {
+        "fieldApiName": "FirstName",
+        "source": "question",
+        "questionId": "q_name0001",
+        "part": "firstName"
+      },
+      {
+        "fieldApiName": "Company",
+        "source": "question",
+        "questionId": "q_comp0001"
+      },
+      {
+        "fieldApiName": "Email",
+        "source": "question",
+        "questionId": "q_mail0001"
+      },
+      {
+        "fieldApiName": "Description",
+        "source": "question",
+        "questionId": "q_join0001"
+      },
+      {
+        "fieldApiName": "NumberOfEmployees",
+        "source": "question",
+        "questionId": "q_seat0001"
+      },
+      {
+        "fieldApiName": "LeadSource",
+        "source": "question",
+        "questionId": "q_src00001"
+      },
+      {
+        "fieldApiName": "Title",
+        "source": "context",
+        "contextKey": "receiptNo"
+      }
+    ]
+  },
+  "settings": {
+    "allowedLampIds": null,
+    "responseLimit": "once",
+    "completionPage": {
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "お申し込みありがとうございました"
+        },
+        {
+          "type": "text",
+          "content": [
+            {
+              "text": "開催前日に"
+            },
+            {
+              "text": "参加URL",
+              "bold": true
+            },
+            {
+              "text": "をLINEでお送りします。"
+            }
+          ]
+        },
+        {
+          "type": "button",
+          "label": "LINEに戻る",
+          "action": "close"
+        }
+      ]
+    },
+    "submitLabel": "申し込む",
+    "title": "オンラインセミナー申込",
+    "theme": {
+      "primaryColor": "#06C755"
+    },
+    "layout": "single",
+    "linkFriend": {
+      "enabled": true,
+      "overwrite": false
+    },
+    "campaign": {
+      "campaignId": "<キャンペーンID（701…）>",
+      "status": "<CampaignMemberStatus の Label>"
+    }
+  },
+  "completion": {
+    "templateId": "<回答後に送るテンプレートのID（不要なら null）>"
+  }
+}
