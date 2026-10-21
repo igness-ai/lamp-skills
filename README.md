@@ -6,7 +6,7 @@
 | スキル | できること | 必要なパッケージ |
 | --- | --- | --- |
 | [`lamp-setup`](skills/lamp-setup/SKILL.md) | パッケージインストール後の初期設定（権限セットグループ作成・権限割当・サーバー認証・パス有効化）を自動で進め、LAMP では続けて最初の公式アカウント接続（`lamp-social-account-setup`）まで通す | Igness LAMP **1.153 以降** |
-| [`lamp-social-account-setup`](skills/lamp-social-account-setup/SKILL.md) | LINE 公式アカウントを接続する（初回・2 つ目以降の追加）。チャネル接続・LIFF 自動作成・公式アカウントレコード作成・連携項目・疎通確認まで進め、接続済みアカウントの確認・解除の案内と、チャネル情報の再認証（1.158 以降）も行う | Igness LAMP **1.153 以降**（再認証は **1.158 以降**） |
+| [`lamp-social-account-setup`](skills/lamp-social-account-setup/SKILL.md) | LINE 公式アカウントを接続する（初回・2 つ目以降の追加）。チャネル接続・LIFF 自動作成・公式アカウントレコード作成・連携項目・疎通確認まで進め、接続済みアカウントの確認・解除の案内と、チャネル情報の再認証（1.158 以降）も行う。公式アカウントの設定（リンク計測・計測除外ドメインの変更、Webhook 転送の取得・変更・接続テスト、レコード推定の切り替えの案内）も扱う | Igness LAMP **1.153 以降**（再認証は **1.158 以降**、Webhook 転送は **1.160 以降**） |
 | [`lamp-media-upload`](skills/lamp-media-upload/SKILL.md) | 画像・動画をコンテンツ配信基盤へアップロードし、テンプレートメッセージ・クーポン・リッチメニュー・送信元アイコンに設定する | Igness LAMP **1.155 以降** |
 | [`lamp-template`](skills/lamp-template/SKILL.md) | テンプレートと9種類のテンプレートメッセージ（テキスト／画像／動画／リンク付き画像／カード／設問（2択）／カード（画像のみ）／クーポン／フレックス）を作成し、有効化エラーを読んで修正、返信ボタン・項目の代入・テスト配信まで行う | Igness LAMP **1.156 以降** |
 | [`lamp-broadcast`](skills/lamp-broadcast/SKILL.md) | 一斉配信を作成・スケジュール・キャンセルし、配信の状態確認、配信結果（成功／失敗、個人別 CSV）、既読数・クリック数の取得まで行う。対象は CSV と Salesforce レポートの両方に対応し、レポート＋繰り返しでセグメント定期配信・友だち追加 N 日後のステップ配信を組む | Igness LAMP **1.157 以降** |
@@ -18,6 +18,8 @@
 | [`lamp-case-support`](skills/lamp-case-support/SKILL.md) | LINE のボタン（リッチメニュー・テンプレート）を押すとケースが開き、ケースがクローズすると友だちの「対応中ケース」が空になる仕組み（項目3つ・フロー2本・ケース起動テンプレート）を作る | Igness LAMP（1.161 で動作確認） |
 | [`lamp-slack-notify`](skills/lamp-slack-notify/SKILL.md) | 友だちから LINE メッセージを受信したら Slack に通知するフロー（プラットフォームイベントで起動）を作る | Igness LAMP **1.165 以降**（グループトークを通知から外す条件のため）＋ Salesforce と Slack の連携 |
 | [`lamp-data360-setup`](skills/lamp-data360-setup/SKILL.md) | LAMP の会話を Salesforce Data 360（旧 Data Cloud）へ取り込む初期設定（拡張パッケージの確認・Data Kit の展開・コネクタ権限・着信の確認）を行う | Igness LAMP ＋ Data 360 拡張パッケージ。連携の有効化（オプション契約）は Igness 側で行う |
+| [`lamp-message-record`](skills/lamp-message-record/SKILL.md) | LINE のメッセージ 1 件ごとに紐づく Salesforce レコード（ケース・商談など）を確認し、付け替え・外すまで行う。1to1 とグループトークの両方に対応し、受信したメッセージを友だちの項目のレコードへ自動で紐づけるフローのひな形も作る | Igness LAMP **1.168 以降**（送るときの紐づけと 1to1 の履歴の確認は 1.166 以降） |
+| [`lamp-form`](skills/lamp-form/SKILL.md) | LAMP フォームを作成し、質問・表示条件・隠し項目・保存先と項目の対応・送信後の画面・回答後の LINE テンプレート・キャンペーンメンバー・友だちとの紐づけまで設定して公開し、配布 URL の発行と回答の確認まで行う | Igness LAMP **1.168 以降** |
 
 ## インストール
 
@@ -81,6 +83,7 @@ cp -R lamp-skills/skills/* .claude/skills/
 
 | lamp-skills | LAMP パッケージ |
 | --- | --- |
+| 1.10.x | 1.9.x に `lamp-message-record`（メッセージごとのレコードの確認・付け替え・自動紐づけ）と `lamp-form`（フォームの作成・公開・回答の確認）を追加（どちらも 1.168 以降）。`lamp-social-account-setup` にリンク計測・計測除外ドメインの変更とレコード推定の案内を追加 |
 | 1.9.x | 1.8.x に `lamp-data360-setup`（Data 360 連携の初期設定）を追加。`lamp-social-account-setup` に Webhook 転送の取得・変更・接続テストを追加。`lamp-slack-notify` はグループトークの発言を通知しない（`igns__GroupId__c` が空のイベントだけ通知・1.165 以降） |
 | 1.8.x | 1.7.x に `lamp-case-support`（ボタンでケース起動・クローズで対応中ケースを外す）と `lamp-slack-notify`（受信メッセージの Slack 通知）を追加。どちらも顧客 org にフロー・項目を作るもので、新しい global アクションは使わない |
 | 1.7.x | 1.6.x の `lamp-richmenu` にタブ付きメニュー（別メニューを切り替えでつなぐ）・自由配置・12 領域・分析（`igns__LampGetRichMenuInsightsAction`）を追加（1.161 以降）。`lamp-setup` のスケジュールジョブを 4 件にし、パッケージのアップグレード後の再実行を追記 |
