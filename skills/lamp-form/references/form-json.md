@@ -207,11 +207,11 @@
 | キー | 値 | 既定 |
 |---|---|---|
 | `allowedLampIds` | 配布する公式アカウントの LAMP ID の配列。`null` なら組織の全公式アカウント（**空配列は公開不可**） | `null` |
-| `responseLimit` | `once`（公式アカウント×LINEユーザーごとに1回。保存に失敗した回答は数えない）/ `unlimited`。**必須** | — |
+| `responseLimit` | `once`（公式アカウント×LINEユーザーごとに1回。保存に失敗した回答は数えない。回答済みの人が開き直すと、入力の前に「このフォームには回答済みです。」と出る）/ `unlimited`。**必須** | — |
 | `completionPage` | 送信後の画面（§6.1） | 空 |
 | `submitLabel` | 送信ボタンの文言（≤20文字） | 「送信する」 |
 | `title` | 回答画面のタイトル（≤80文字）。`null` ならフォーム名 | `null` |
-| `theme.primaryColor` | `#RRGGBB`。送信ボタン・選択中の部品の色。編集画面の候補: `#06C755` `#0176D3` `#1B5297` `#E4007F` `#FF6B00` `#222222` | `#06C755` |
+| `theme.primaryColor` | `#RRGGBB`。送信ボタン・送信後の画面のボタン・選択中の部品・入力中の枠・ページの進み具合のバーの色（ボタンの文字の白黒は自動。ボタンごとの色・背景色・フォントは変えられない）。編集画面の候補: `#06C755` `#0176D3` `#1B5297` `#E4007F` `#FF6B00` `#222222` | `#06C755` |
 | `layout` | `single` / `step`（§2.3） | `single` |
 | `linkFriend` | `{enabled, overwrite}`。保存先がリード・取引先責任者のとき、回答した友だちの「リード」「取引先責任者」に保存したレコードを入れる。`overwrite:false` なら既に入っている友だちは変えない | `{enabled:true, overwrite:false}` |
 | `campaign` | `null` か `{campaignId, status}`（§6.2） | `null` |
