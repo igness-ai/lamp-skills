@@ -36,7 +36,7 @@ sf package installed list -o <org> --json | jq -r '.result[] | select(.Subscribe
 sf api request rest "/services/data/v67.0/ssot/data-streams" -o <org> | jq -r '.dataStreams[] | "\(.name)\t\(.dataStreamStatus)"'
 ```
 
-`Igness_LAMP_Timeline_…`・`igns_SocialFriend_c_Home`・`igns_Reply_c_Home`・`igns_Broadcast_c_Home` の4本が `ACTIVE` なら展開済み。手順2の権限を確かめてから手順4へ進む。一部だけある場合は、重ねて展開せず、まず状況を利用者に伝える。
+`Igness_LAMP_Timeline_…`・`igns_SocialFriend_c_Home`・`igns_Reply_c_Home`・`igns_Broadcast_c_Home`・`igns_SocialGroup_c_Home`・`igns_SocialGroupMember_c_Home` の6本が `ACTIVE` なら展開済み。グループの2本だけが無い場合は、グループトークに対応する前の拡張パッケージで展開した org なので、状況を利用者に伝えて Igness に相談するよう案内する（重ねて展開しない）。手順2の権限を確かめてから手順4へ進む。一部だけある場合は、重ねて展開せず、まず状況を利用者に伝える。
 
 ## 2. コネクタの読み取り権限を確かめる（展開の前に）
 
@@ -49,21 +49,23 @@ sf data query -q "SELECT PermissionsViewAllData FROM PermissionSet WHERE Name = 
 `PermissionsViewAllData` が `true` なら、すべて読めるので手順3へ進む。`false` なら、オブジェクトと項目の権限を確かめる。
 
 ```bash
-sf data query -q "SELECT SobjectType, PermissionsRead, PermissionsViewAllRecords FROM ObjectPermissions WHERE Parent.Name = 'sfdc_a360_sfcrm_data_extract' AND SobjectType IN ('igns__SocialFriend__c','igns__Reply__c','igns__Broadcast__c')" -o <org>
-sf data query -q "SELECT Field FROM FieldPermissions WHERE Parent.Name = 'sfdc_a360_sfcrm_data_extract' AND PermissionsRead = true AND SobjectType IN ('igns__SocialFriend__c','igns__Reply__c','igns__Broadcast__c')" -o <org>
+sf data query -q "SELECT SobjectType, PermissionsRead, PermissionsViewAllRecords FROM ObjectPermissions WHERE Parent.Name = 'sfdc_a360_sfcrm_data_extract' AND SobjectType IN ('igns__SocialFriend__c','igns__Reply__c','igns__Broadcast__c','igns__SocialGroup__c','igns__SocialGroupMember__c')" -o <org>
+sf data query -q "SELECT Field FROM FieldPermissions WHERE Parent.Name = 'sfdc_a360_sfcrm_data_extract' AND PermissionsRead = true AND SobjectType IN ('igns__SocialFriend__c','igns__Reply__c','igns__Broadcast__c','igns__SocialGroup__c','igns__SocialGroupMember__c')" -o <org>
 ```
 
-- オブジェクト: 3件とも `PermissionsRead` と `PermissionsViewAllRecords` が `true` であること。
+- オブジェクト: 5件とも `PermissionsRead` と `PermissionsViewAllRecords` が `true` であること。
 - 項目: 次の項目がすべて返ること（必須項目は一覧に無くても読める）。
   - `igns__SocialFriend__c`: ClickCount__c, Contact__c, CurrentAIReplyHistory__c, Email__c, FirstSocialFriendActivity__c, FirstSocialFriendActivityDateTime__c, FirstSocialFriendActivitySourceName__c, IsActionRequired__c, IsAIReply__c, IsBlocked__c, IsTest__c, LampId__c, Language__c, LastClickedAt__c, LastConvertedAt__c, LastMessageDate__c, LastSentMessageDateTime__c, Lead__c, NonReply__c, PictureUrl__c, RichMenu__c, SocialAccount__c, StatusMessageText__c, UserId__c（すべて `igns__` 付き）
   - `igns__Reply__c`: Agent__c, AgentforceAgentApiName__c, ConversationEndHour__c, Sender__c, SocialAccount__c, Sort__c, Template__c
   - `igns__Broadcast__c`: AllowDuplicate__c, Cron__c, CsvFileId__c, EndDateTime__c, IsSystem__c, JobId__c, LastError__c, LastErrorAt__c, Mode__c, NextExecutionDate__c, ReportId__c, ScheduleTimeZone__c, StartDateTime__c, StreamType__c, Template__c
+  - `igns__SocialGroup__c`: BotStatus__c, GroupId__c, IsActionRequired__c, LastMessageDate__c, LastSentMessageDateTime__c, MemberCount__c, PictureUrl__c, SocialAccount__c
+  - `igns__SocialGroupMember__c`: LastSentMessageDateTime__c, MemberKey__c, PictureUrl__c, SocialFriend__c, Status__c, UserId__c（グループへの参照は主従関係なので一覧に無くても読める）
 
 足りないものがあれば、不足している一覧を利用者に示し、画面での付与を案内する（［設定］→［権限セット］→「Data Cloud Salesforce Connector」→［オブジェクト設定］→ 各オブジェクトの［編集］で「参照」「すべてのレコードの参照」と項目の「参照アクセス権」）。お客様の権限設定を変える操作なので、このスキルから書き換えない。付与が済んだら、上の照会でもう一度確かめてから手順3へ進む。
 
 ## 3. Data Kit を展開する
 
-インストール直後は定義が届いているだけで、データストリームもデータモデルも無い。次の1回で、取り込みAPIの接続「Igness_LAMP」、データストリーム4本、データモデル、リレーションが作られる（約3分）。
+インストール直後は定義が届いているだけで、データストリームもデータモデルも無い。次の1回で、取り込みAPIの接続「Igness_LAMP」、データストリーム6本（友だち・自動応答・配信・グループ・グループメンバー・会話）、データモデル、リレーションが作られる（約3分）。
 
 ```bash
 ORG_ID=$(sf org display -o <org> --json | jq -r '.result.id' | cut -c1-15)
@@ -87,7 +89,7 @@ sf data query -q "SELECT FIELDS(ALL) FROM DataKitDeploymentLog WHERE JobIdentifi
 
 画面で行う場合は、［設定］のデータキットの画面ではなく、**Data Cloud アプリの［データストリーム］→［新規］から、2回に分けて**作る（［設定］のデータキット詳細には展開のボタンが無い）。
 
-1. 友だち・自動応答・配信:「Salesforce CRM」→［次へ］→ 一覧の一番下「カスタムバンドル」の `LAMP_Friend` →［次へ］→［次へ］→［リリース］（入力なし）
+1. 友だち・自動応答・配信・グループ・グループメンバー:「Salesforce CRM」→［次へ］→ 一覧の一番下「カスタムバンドル」の `LAMP_Friend` →［次へ］→［次へ］→［リリース］（入力なし）
 2. 会話:「インストール済みデータキットおよびパッケージ」→［次へ］→「Igness LAMP Data Kit」→ `LAMP_Timeline` にチェック →［次へ］→［新規コネクタ］→ **コネクタ名に `Igness_LAMP` と入力**（既定値は無い。ここを誤ると会話が届かない）→［保存］→［次へ］→［次へ］→［リリース］
 
 画面つきの手順はヘルプの「Data 360連携を設定したい」を案内する。
@@ -127,18 +129,21 @@ sf api request rest "/services/data/v67.0/ssot/queryv2" --method POST --body @/t
 
 | データモデル | 内容 |
 |---|---|
-| Igness LAMP Timeline | 会話1件ごと。向き、種類、本文、日時、メッセージの構造（Flex など）、メディアURL、配信ID、AI自動返信かどうか、送信取消の印、送信元の種別とID |
+| Igness LAMP Timeline | 会話1件ごと（1対1とグループトーク）。向き、種類、本文、日時、メッセージの構造（Flex など）、メディアURL、配信ID、AI自動返信かどうか、送信取消の印、送信元の種別とID、紐づいた Salesforce レコードのIDとその決まり方、グループID、編集日時 |
 | Igness LAMP Friend | 友だち。取引先責任者・リードへの参照を含む |
 | Igness LAMP Reply / Igness LAMP Broadcast | 自動応答・配信 |
+| Igness LAMP Group / Igness LAMP Group Member | グループと、LAMP が把握したメンバー（メンバーは友だちへの参照を含む） |
 
 - 送信が取り消されたメッセージは、行を残したまま本文・構造・メディアURLを空にし、取消済みの印を付ける。
+- グループの会話は `groupId` に値が入る（1対1の会話は空）。受信した発言の `userId` は発言者で、発言者がその公式アカウントの友だちなら友だちに結ばれる。友だちでないメンバーの発言も入る。
+- 紐づいたレコード（`recordId`）は18桁のID。ケース・商談などお客様ごとに違うので、キットにはリレーションを入れていない。結びたい場合は、Data 360 でそのオブジェクトのデータモデルへのリレーションを足すよう案内する。
 - 自動応答の「APIキー」項目は Data 360 へ取り込まない。
 - 画像・動画・ファイルは原本を取り込まない。URLも、誰でも開ける公開URLは送らず、LAMP の非公開の参照（`https://files.mylp.jp/…`）だけを入れる。この参照は Data 360 の画面からは開けない。見るときは、友だちのレコードから Salesforce のチャット画面を開く。非公開ファイルの保存を有効にしていない org では、ファイルのURLは空で入る（種類は `messageType` で分かる）。
 - 担当者が送った会話の `sourceUserId` は、Data 360 の標準の User データモデルに結ばれる。ユーザーの取り込みはこのキットに含まれない（下の節）。
 
 ## 担当者（ユーザー）まで結びたい場合
 
-会話からユーザーへのリレーションはパッケージに入っているが、**org でユーザーが Data 360 に取り込まれていない間は現れない**（展開は成功し、他の3本は立つ。会話側にはユーザーIDの値が入る）。ユーザーの取り込みは、Data Kit の展開の前でも後でもよい。**後から取り込んだ場合も、ユーザーのデータストリームを作った時点でリレーションが自動で有効になる。Data Kit の再展開は要らない。**
+会話からユーザーへのリレーションはパッケージに入っているが、**org でユーザーが Data 360 に取り込まれていない間は現れない**（展開は成功し、他のリレーションは立つ。会話側にはユーザーIDの値が入る）。ユーザーの取り込みは、Data Kit の展開の前でも後でもよい。**後から取り込んだ場合も、ユーザーのデータストリームを作った時点でリレーションが自動で有効になる。Data Kit の再展開は要らない。**
 
 既にユーザーを取り込んでいる org（Sales Cloud のデータバンドル等）では、何もしなくてよい。取り込んでいない org では、利用者に確認のうえ次を案内する（画面操作・6クリック・入力なし）。
 
@@ -153,4 +158,4 @@ sf api request rest "/services/data/v67.0/ssot/metadata?entityType=DataModelObje
   | jq -r '.metadata[0].relationships[] | "\(.fromEntityAttribute) -> \(.toEntity)"'
 ```
 
-`igns__sourceUserId__c -> ssot__User__dlm` を含む4本が出ること。ユーザーの既定の取り込み項目は多い（185項目中79項目）ので、絞りたい場合は作成時の項目選択で外す。リレーションに必要なのは User Id だけ。
+`igns__sourceUserId__c -> ssot__User__dlm` を含む6本（友だち・自動応答・配信・ユーザー・グループ・グループメンバー）が出ること。ユーザーの既定の取り込み項目は多い（185項目中79項目）ので、絞りたい場合は作成時の項目選択で外す。リレーションに必要なのは User Id だけ。
