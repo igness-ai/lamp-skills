@@ -83,7 +83,7 @@ cp -R lamp-skills/skills/* .claude/skills/
 
 | lamp-skills | LAMP パッケージ |
 | --- | --- |
-| 1.10.x | 1.9.x に `lamp-message-record`（メッセージごとのレコードの確認・付け替え・自動紐づけ）と `lamp-form`（フォームの作成・公開・回答の確認）を追加（どちらも 1.168 以降）。`lamp-social-account-setup` にリンク計測・計測除外ドメインの変更とレコード推定の案内を追加 |
+| 1.10.x | 1.9.x に `lamp-message-record`（メッセージごとのレコードの確認・付け替え・自動紐づけ）と `lamp-form`（フォームの作成・公開・回答の確認）を追加（どちらも 1.168 以降）。`lamp-social-account-setup` にリンク計測・計測除外ドメインの変更とレコード推定の案内を追加。1.10.1 で `lamp-data360-setup` がグループトーク・メッセージのレコード紐づけ（Data 360 拡張パッケージ 1.1.0 以降・基本 1.168 以降）に対応 |
 | 1.9.x | 1.8.x に `lamp-data360-setup`（Data 360 連携の初期設定）を追加。`lamp-social-account-setup` に Webhook 転送の取得・変更・接続テストを追加。`lamp-slack-notify` はグループトークの発言を通知しない（`igns__GroupId__c` が空のイベントだけ通知・1.165 以降） |
 | 1.8.x | 1.7.x に `lamp-case-support`（ボタンでケース起動・クローズで対応中ケースを外す）と `lamp-slack-notify`（受信メッセージの Slack 通知）を追加。どちらも顧客 org にフロー・項目を作るもので、新しい global アクションは使わない |
 | 1.7.x | 1.6.x の `lamp-richmenu` にタブ付きメニュー（別メニューを切り替えでつなぐ）・自由配置・12 領域・分析（`igns__LampGetRichMenuInsightsAction`）を追加（1.161 以降）。`lamp-setup` のスケジュールジョブを 4 件にし、パッケージのアップグレード後の再実行を追記 |

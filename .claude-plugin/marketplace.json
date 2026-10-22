@@ -28,7 +28,7 @@
         "./skills/lamp-message-record",
         "./skills/lamp-form"
       ],
-      "version": "1.10.0",
+      "version": "1.10.1",
       "category": "productivity",
       "tags": [
         "salesforce",
